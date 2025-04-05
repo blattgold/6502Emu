@@ -12,14 +12,20 @@ class CPU:
         self._memory = memory
 
         self._decodeFunctionLookupTable = {
+            # NOP
+            0xEA: executeNOP(self),
+
+            # CLD
             0xD8: executeCLD(self),
 
+            # TXS
             0x9A: executeTXS(self),
 
+            # JMP
             0x4C: executeJumpDirect(self),
             0x6C: executeJumpIndirect(self, memory),
 
-            # TODO BCD ADC
+            # ADC TODO BCD
             0x69: executeADCImm(self),
             0x65: executeADCZeroPage(self, memory),
             0x75: executeADCZeroPageX(self, memory),
@@ -29,6 +35,7 @@ class CPU:
             0x61: executeADCIndirectIndexed(self, memory, "X"),
             0x71: executeADCIndirectIndexed(self, memory, "Y"),
 
+            # LDA
             0xA9: executeLDAImm(self),
             0xA5: executeLDAZeroPage(self, memory),
             0xB5: executeLDAZeroPageX(self, memory),
@@ -38,12 +45,14 @@ class CPU:
             0xA1: executeLDAIndirectIndexed(self, memory, "X"),
             0xB1: executeLDAIndirectIndexed(self, memory, "Y"),
 
+            # LDX
             0xA2: executeLDXImm(self),
             0xA6: executeLDXZeroPage(self, memory),
             0xB6: executeLDXZeroPageY(self, memory),
             0xAE: executeLDXAbsolute(self, memory),
             0xBE: executeLDXAbsoluteY(self, memory),
 
+            #LDY
             0xA0: executeLDYImm(self),
             0xA4: executeLDYZeroPage(self, memory),
             0xB4: executeLDYZeroPageX(self, memory),
@@ -126,7 +135,7 @@ class CPU:
     
     def fetchInstruction(self):
         '''
-        advances the PC and loads the next instruction into currentInstruction
+        loads the next instruction into currentInstruction
         '''
         pc = self.getRegister("PC")
         self.currentInstruction = self._memory.getByte(pc)
@@ -177,9 +186,13 @@ class CPU:
         '''
         carry, zero, interrupt disable, decimal mode, break command, overflow, negative
         '''
+        assert(type(val) == bool or type(val) == np.bool)
         self._flags[flag] = np.bool(val)
     
     def resetFlags(self):
+        """
+        sets all flags to False
+        """
         for flagKey in self._flags.keys():
             self._flags[flagKey] = np.bool(False)
 
@@ -194,17 +207,3 @@ class CPU:
                 self._registers[registerKey] = np.uint8(0)
         for flagKey in self._flags.keys():
             self._flags[flagKey] = np.bool(False)
-
-if __name__ == "__main__":
-    memory = Memory()
-    cpu = CPU(memory)
-    memory.setBytes(0x10, [12, 13, 66])
-    memory.setBytes(0x1000,[0xA9, 12, 0x65, 0x10, 0x65, 0x11])
-    cpu.reset()
-    print(cpu.getRegister("A"))
-    cpu.runSingleInstructionCycle()
-    print(cpu.getRegister("A"))
-    cpu.runSingleInstructionCycle()
-    print(cpu.getRegister("A"))
-    cpu.runSingleInstructionCycle()
-    print(cpu.getRegister("A"))

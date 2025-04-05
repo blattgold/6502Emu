@@ -4,9 +4,49 @@ from memory import Memory
 memory = Memory()
 cpu = CPU(memory)
 
-#TODO JMP tests
-#TODO CLD tests
 
+#NOP
+def testNOP():
+    memory.setBytes(0x1000, [0xEA, 0xEA])
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(cpu.runSingleInstructionCycle() == 2)
+
+#JMP
+def testJMPDirect():
+    memory.setBytes(0x1000, [0x4C, 0x11, 0x33])
+    memory.setByte(0x3311, 0xEA)
+    assert(cpu.runSingleInstructionCycle() == 3)
+    assert(cpu.getRegister("PC") == 0x3311)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(cpu.getRegister("PC") == 0x3312)
+
+def testJMPIndirect():
+    memory.setBytes(0x1000, [0x6C, 0x11, 0x33])
+    memory.setBytes(0x3311, [0x11, 0x44])
+    memory.setByte(0x4411, 0xEA)
+    assert(cpu.runSingleInstructionCycle() == 5)
+    assert(cpu.getRegister("PC") == 0x4411)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(cpu.getRegister("PC") == 0x4412)
+
+#TXS
+def testTXS():
+    memory.setBytes(0x1000, [0x9A])
+    cpu.setRegister("X", 99)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(cpu.getRegister("SP") == 99)
+
+#CLD
+def testCLD():
+    memory.setBytes(0x1000, [0xD8, 0xD8])
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(not cpu.getFlag("decimal mode"))
+
+    cpu.setFlag("decimal mode", True)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    assert(not cpu.getFlag("decimal mode"))
+
+#ADC TODO BCD Mode
 def testADCImm():
     # overflow, zero, carry and negative
     memory.setBytes(0x1000, [0x69, 12, 0x69, 128, 0x69, 64, 0x69, 1, 0x69, 0])
@@ -486,9 +526,7 @@ def testADCIndirect():
     cpu.resetFlags()
     cpu.setRegister("Y", 0)
 
-
-
-
+#LDA
 def testLDAImm():
     memory.setBytes(0x1000, [0xA9, 0x45, 0xA9, 0x00, 0xA9, 0x80])
 
@@ -606,7 +644,6 @@ def testLDAIndirectX():
     assert(cpu.getRegister("A") == 77)
     cpu.setRegister("X", 1)
     assert(cpu.runSingleInstructionCycle() == 6)
-    print(cpu.getRegister("A"))
     assert(cpu.getRegister("A") == 88)
 
 def testLDAIndirectY():
@@ -623,7 +660,6 @@ def testLDAIndirectY():
     assert(cpu.getRegister("A") == 88)
 
 # LDX
-
 def testLDXImm():
     memory.setBytes(0x1000, [0xA2, 129])
     assert(cpu.runSingleInstructionCycle() == 2)
@@ -660,7 +696,6 @@ def testLDXAbsoluteY():
     assert(cpu.getRegister("X") == 0x30)
 
 # LDY
-
 def testLDYImm():
     memory.setBytes(0x1000, [0xA0, 129])
     assert(cpu.runSingleInstructionCycle() == 2)
@@ -697,12 +732,21 @@ def testLDYAbsoluteY():
     assert(cpu.getRegister("Y") == 0x30) 
 
 tests = [
+    testNOP,
+
+    testJMPDirect,
+    testJMPIndirect,
+
+    testTXS,
+    testCLD,
+
     testADCImm,
     testADCZeroPage,
     testADCZeroPageX,
     testADCAbsolute,
     testADCAbsoluteIndexed,
     testADCIndirect,
+
     testLDAImm,
     testLDAZeroPage,
     testLDAZeroPageX,
@@ -711,11 +755,13 @@ tests = [
     testLDAAbsoluteY,
     testLDAIndirectX,
     testLDAIndirectY,
+
     testLDXImm,
     testLDXZeroPage,
     testLDXZeroPageY,
     testLDXAbsolute,
     testLDXAbsoluteY,
+
     testLDYImm,
     testLDYZeroPage,
     testLDYZeroPageY,

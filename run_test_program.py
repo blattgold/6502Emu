@@ -33,6 +33,7 @@ with open(os.path.join(DIR, "testProgram", "6502_functional_test.bin"), "rb") as
 
     for x in range(10):
         print(hex(bin_arr[0x0400 + x]))
+    print()
 
     while loops < 10:
         cpu.runSingleInstructionCycle()

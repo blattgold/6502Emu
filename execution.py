@@ -7,7 +7,15 @@ def Load2ByteAddress(cpu):
     addrHi = np.uint16(cpu.currentInstruction)
     return (addrHi << 8) | addrLo
 
+# NOP
+def executeNOP(cpu):
+    def execute():
+        cpu.addClockCyclesThisCycle(2)
+        cpu.incrementPC()
 
+    return execute
+
+# TXS
 def executeTXS(cpu):
     def execute():
         cpu.setRegister("SP", cpu.getRegister("X"))
@@ -16,7 +24,7 @@ def executeTXS(cpu):
 
     return execute
 
-
+# CLD
 def executeCLD(cpu):
     def execute():
         cpu.setFlag("decimal mode", False)
@@ -25,9 +33,7 @@ def executeCLD(cpu):
 
     return execute
 
-
-
-
+# JMP
 def executeJumpDirect(cpu):
     def execute():
         addr = Load2ByteAddress(cpu)
@@ -41,12 +47,12 @@ def executeJumpIndirect(cpu, memory):
         addr = Load2ByteAddress(cpu)
         memValueAddrLo = memory.getByte(addr)
         memValueAddrHi = memory.getByte(addr + 1)
-        memValueAddr = ((memValueAddrHi << 8) | memValueAddrLo)
+        memValueAddr = ((np.uint16(memValueAddrHi) << 8) | np.uint16(memValueAddrLo))
         cpu.setRegister("PC", memValueAddr)
         cpu.addClockCyclesThisCycle(5)
     return execute
 
-
+# ADC
 def setADCFlags(cpu, result16, result8, a, operand):
     cpu.setFlag("carry", result16 > 0xFF)
     same_sign = (a & 0x80) == (operand & 0x80)
@@ -55,7 +61,6 @@ def setADCFlags(cpu, result16, result8, a, operand):
     cpu.setFlag("overflow", overflow != 0)
     cpu.setFlag("zero", result8 == 0)
     cpu.setFlag("negative", result8 & 0x80 != 0)
-
 
 def executeADCImm(cpu):
     def execute():
@@ -151,8 +156,6 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
         operand = memory.getByte(memValueAddr)
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
-        print(hex(cpu.currentInstruction + np.uint16(cpu.getRegister("X"))))
-        print(hex(memValueAddrLo), hex(memValueAddrHi), hex(memValueAddr))
 
         result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
         result8 = np.uint8(result16)
@@ -186,20 +189,12 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
         cpu.incrementPC()
     return executeX if offsetRegister == "X" else executeY
 
-
+# LDA TODO refactor
 def LDSetFlags(result, cpu):
     if result == 0: cpu.setFlag("zero", True)
     else: cpu.setFlag("zero", False)
     if result & 0b10000000: cpu.setFlag("negative", True)
     else: cpu.setFlag("negative", False)
-
-
-
-def LoadAddressIndirectX(cpu, memory, indexReg):
-    addr = LoadAddressAbsolute(cpu, memory)
-    return addr
-
-# LDA
 
 def executeLDAImm(cpu):
     def execute():
@@ -309,8 +304,7 @@ def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
         cpu.incrementPC()
     return executeX if offsetRegister == "X" else executeY
 
-# LDX
-
+# LDX TODO refactor
 def executeLDXImm(cpu):
     def execute():
         cpu.incrementPC().fetchInstruction()
@@ -374,8 +368,7 @@ def executeLDXAbsoluteY(cpu, memory):
         cpu.incrementPC()
     return execute
 
-# LDY
-
+# LDY TODO refactor
 def executeLDYImm(cpu):
     def execute():
         cpu.incrementPC().fetchInstruction()
