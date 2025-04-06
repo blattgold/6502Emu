@@ -33,6 +33,49 @@ def executeCLD(cpu):
 
     return execute
 
+# BRANCH
+def executeBranch(branch, cpu):
+    cpu.incrementPC().fetchInstruction()
+
+    if branch:
+        pcBefore = cpu.getPC()
+        offset = cpu.currentInstruction - 256 if cpu.currentInstruction > 127 else cpu.currentInstruction
+        pcAfter = pcBefore + offset
+        cpu.setPC(pcAfter)
+
+        if pcBefore // 256 != pcAfter // 256:
+            cpu.addClockCyclesThisCycle(4)
+        else:
+            cpu.addClockCyclesThisCycle(3)
+
+    else:
+        cpu.addClockCyclesThisCycle(2)
+        cpu.incrementPC()
+
+def executeBCC(cpu):
+    return lambda: executeBranch(not cpu.getFlag("carry"), cpu)
+
+def executeBCS(cpu):
+    return lambda: executeBranch(cpu.getFlag("carry"), cpu)
+
+def executeBEQ(cpu):
+    return lambda: executeBranch(cpu.getFlag("zero"), cpu)
+
+def executeBMI(cpu):
+    return lambda: executeBranch(cpu.getFlag("negative"), cpu)
+
+def executeBNE(cpu):
+    return lambda: executeBranch(not cpu.getFlag("zero"), cpu)
+
+def executeBPL(cpu):
+    return lambda: executeBranch(not cpu.getFlag("negative"), cpu)
+
+def executeBVC(cpu):
+    return lambda: executeBranch(not cpu.getFlag("overflow"), cpu)
+
+def executeBVS(cpu):
+    return lambda: executeBranch(cpu.getFlag("overflow"), cpu)
+
 # JMP
 def executeJumpDirect(cpu):
     def execute():
@@ -50,6 +93,101 @@ def executeJumpIndirect(cpu, memory):
         memValueAddr = memValueAddrHi << 8 | memValueAddrLo
         cpu.setPC(memValueAddr)
         cpu.addClockCyclesThisCycle(5)
+    return execute
+
+# STA TODO tests
+def executeSTAZeroPage(cpu, memory):
+    def execute():
+        cpu.incrementPC().cpu.fetchInstruction()
+        addr = cpu.currentInstruction
+        a = cpu.getRegister("A")
+
+        memory.setByte(addr, a)
+
+        cpu.incrementPC()
+        cpu.addClockCyclesThisCycle(3)
+    return execute
+
+def executeSTAZeroPageX(cpu, memory):
+    def execute():
+        cpu.incrementPC().cpu.fetchInstruction()
+        addr = (cpu.currentInstruction + cpu.getRegister("X")) &0xFF
+        a = cpu.getRegister("A")
+
+        memory.setByte(addr, a)
+
+        cpu.incrementPC()
+        cpu.addClockCyclesThisCycle(4)
+    return execute
+
+def executeSTAAbsolute(cpu, memory):
+    def execute():
+        addr = Load2ByteAddress(cpu)
+        a = cpu.getRegister("A")
+
+        memory.setByte(addr, a)
+
+        cpu.incrementPC()
+        cpu.addClockCyclesThisCycle(4)
+    return execute
+
+def executeSTAAbsoluteIndexed(cpu, memory, register):
+    def execute():
+        addr = Load2ByteAddress(cpu) + cpu.getRegister(register)
+        a = cpu.getRegister("A")
+
+        memory.setByte(addr, a)
+
+        cpu.incrementPC()
+        cpu.addClockCyclesThisCycle(5)
+    return execute
+
+def executeSTAIndirectIndexed(cpu, memory, register):
+    def executeX():
+        cpu.incrementPC().fetchInstruction()
+        memValueAddrLo = memory.getByte(cpu.currentInstruction + cpu.getRegister("X"))
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + cpu.getRegister("X") + 1)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
+
+        a = cpu.getRegister("A")
+        memory.setByte(memValueAddr, a)
+
+        cpu.addClockCyclesThisCycle(6)
+        cpu.incrementPC()
+    
+    def executeY():
+        cpu.incrementPC().fetchInstruction()
+        memValueAddrLo = memory.getByte(cpu.currentInstruction)
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + 1)
+        memValueAddr = (memValueAddrHi << 8) | memValueAddrLo
+        memValueAddrOffsetY = memValueAddr + cpu.getRegister("Y")
+
+        a = cpu.getRegister("A")
+        memory.setByte(memValueAddr, a)
+
+        cpu.addClockCyclesThisCycle(6)
+        cpu.incrementPC()
+    return executeX if register == "X" else executeY
+
+# decrement TODO tests
+def setDecrementFlags(val, cpu):
+    cpu.setFlag("zero", val == 0)
+    cpu.setFlag("negative", val > 127)
+
+def executeDEX(cpu):
+    def execute():
+        x = (cpu.getRegister("X") - 1) & 0xFF
+        cpu.setRegister("X", x)
+        setDecrementFlags(x, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(2)
+    return execute
+
+def executeDEY(cpu):
+    def execute():
+        y = (cpu.getRegister("Y") - 1) & 0xFF
+        cpu.setRegister("Y", y)
+        setDecrementFlags(y, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 # ADC

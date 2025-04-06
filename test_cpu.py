@@ -11,6 +11,8 @@ def testNOP():
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.runSingleInstructionCycle() == 2)
 
+#BRANCH TODO tests
+
 #JMP
 def testJMPDirect():
     memory.setBytes(0x1000, [0x4C, 0x11, 0x33])
@@ -45,6 +47,8 @@ def testCLD():
     cpu.setFlag("decimal mode", True)
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(not cpu.getFlag("decimal mode"))
+
+#STA TODO tests
 
 #ADC TODO BCD Mode
 def testADCImm():

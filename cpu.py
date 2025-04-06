@@ -24,9 +24,32 @@ class CPU:
             # TXS
             0x9A: executeTXS(self),
 
+            # BRANCH
+            0x90: executeBCC(self),
+            0xB0: executeBCS(self),
+            0xF0: executeBEQ(self),
+            0x30: executeBMI(self),
+            0xD0: executeBNE(self),
+            0x10: executeBPL(self),
+            0x50: executeBVC(self),
+            0x70: executeBVS(self),
+
             # JMP
             0x4C: executeJumpDirect(self),
             0x6C: executeJumpIndirect(self, memory),
+
+            # STA
+            0x85: executeSTAZeroPage(self, memory),
+            0x95: executeSTAZeroPageX(self, memory),
+            0x8D: executeSTAAbsolute(self, memory),
+            0x9D: executeSTAAbsoluteIndexed(self, memory, "X"),
+            0x99: executeSTAAbsoluteIndexed(self, memory, "Y"),
+            0x81: executeSTAIndirectIndexed(self, memory, "X"),
+            0x91: executeSTAIndirectIndexed(self, memory, "Y"),
+
+            # Decrement
+            0xCA: executeDEX(self),
+            0x88: executeDEY(self),
 
             # ADC TODO BCD
             0x69: executeADCImm(self),
@@ -75,7 +98,7 @@ class CPU:
 
         self._clockCycle = 0
         self._clockCyclesThisCycle = 0
-        self._clockHz = 10
+        self._clockHz = 1
         self._instructionCycle = 0
 
         self._registers = {
@@ -112,11 +135,14 @@ class CPU:
         '''
         run reset() before running to load the reset vector into PC
         '''
+        self._optimizeDecodeLut()
 
         while True:
             cycleBeginTime = time.perf_counter()
 
             self.fetchInstruction()
+            print("op-code: " + hex(self.currentInstruction))
+
             self._decodeFunctionLookupTable[self.currentInstruction]()
 
             cycleEndTime = time.perf_counter()
@@ -134,6 +160,18 @@ class CPU:
 
             self._clockCyclesThisCycle = 0
     
+    def _optimizeDecodeLut(self):
+        def unimplemented(i):
+            def execute(): raise Exception("unimplemented instruction: " + hex(i))
+            return execute
+
+        lutArr = [unimplemented(i) for i in range(256)]
+
+        for i, func in self._decodeFunctionLookupTable.items():
+            lutArr[i] = func
+
+        self._decodeFunctionLookupTable = lutArr
+
     def runSingleInstructionCycle(self):
         '''
         Run reset() before, if this is the first cycle.
