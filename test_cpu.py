@@ -16,18 +16,18 @@ def testJMPDirect():
     memory.setBytes(0x1000, [0x4C, 0x11, 0x33])
     memory.setByte(0x3311, 0xEA)
     assert(cpu.runSingleInstructionCycle() == 3)
-    assert(cpu.getRegister("PC") == 0x3311)
+    assert(cpu.getPC() == 0x3311)
     assert(cpu.runSingleInstructionCycle() == 2)
-    assert(cpu.getRegister("PC") == 0x3312)
+    assert(cpu.getPC() == 0x3312)
 
 def testJMPIndirect():
     memory.setBytes(0x1000, [0x6C, 0x11, 0x33])
     memory.setBytes(0x3311, [0x11, 0x44])
     memory.setByte(0x4411, 0xEA)
     assert(cpu.runSingleInstructionCycle() == 5)
-    assert(cpu.getRegister("PC") == 0x4411)
+    assert(cpu.getPC() == 0x4411)
     assert(cpu.runSingleInstructionCycle() == 2)
-    assert(cpu.getRegister("PC") == 0x4412)
+    assert(cpu.getPC() == 0x4412)
 
 #TXS
 def testTXS():

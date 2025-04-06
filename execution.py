@@ -1,10 +1,10 @@
-import numpy as np
+
 
 def Load2ByteAddress(cpu):
     cpu.incrementPC().fetchInstruction()
-    addrLo = np.uint16(cpu.currentInstruction)
+    addrLo = cpu.currentInstruction
     cpu.incrementPC().fetchInstruction()
-    addrHi = np.uint16(cpu.currentInstruction)
+    addrHi = cpu.currentInstruction
     return (addrHi << 8) | addrLo
 
 # NOP
@@ -37,7 +37,7 @@ def executeCLD(cpu):
 def executeJumpDirect(cpu):
     def execute():
         addr = Load2ByteAddress(cpu)
-        cpu.setRegister("PC", addr)
+        cpu.setPC(addr)
         cpu.addClockCyclesThisCycle(3)
 
     return execute
@@ -47,8 +47,8 @@ def executeJumpIndirect(cpu, memory):
         addr = Load2ByteAddress(cpu)
         memValueAddrLo = memory.getByte(addr)
         memValueAddrHi = memory.getByte(addr + 1)
-        memValueAddr = ((np.uint16(memValueAddrHi) << 8) | np.uint16(memValueAddrLo))
-        cpu.setRegister("PC", memValueAddr)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
+        cpu.setPC(memValueAddr)
         cpu.addClockCyclesThisCycle(5)
     return execute
 
@@ -69,8 +69,8 @@ def executeADCImm(cpu):
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -85,8 +85,8 @@ def executeADCZeroPage(cpu, memory):
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -101,8 +101,8 @@ def executeADCZeroPageX(cpu, memory):
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -116,8 +116,8 @@ def executeADCAbsolute(cpu, memory):
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -128,14 +128,14 @@ def executeADCAbsolute(cpu, memory):
 def executeADCAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
         addr = Load2ByteAddress(cpu)
-        addrOffset = addr + np.uint16(cpu.getRegister(offsetRegister))
+        addrOffset = addr + cpu.getRegister(offsetRegister)
 
         operand = memory.getByte(addrOffset)
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -149,16 +149,16 @@ def executeADCAbsoluteIndexed(cpu, memory, offsetRegister):
 def executeADCIndirectIndexed(cpu, memory, offsetRegister):
     def executeX():
         cpu.incrementPC().fetchInstruction()
-        memValueAddrLo = np.uint16(memory.getByte(cpu.currentInstruction + np.uint16(cpu.getRegister("X"))))
-        memValueAddrHi = np.uint16(memory.getByte(cpu.currentInstruction + np.uint16(cpu.getRegister("X") + 1)))
-        memValueAddr = ((memValueAddrHi << 8) | memValueAddrLo)
+        memValueAddrLo = memory.getByte(cpu.currentInstruction + cpu.getRegister("X"))
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + cpu.getRegister("X") + 1)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
 
         operand = memory.getByte(memValueAddr)
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -168,17 +168,17 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
-        memValueAddrLo = np.uint16(memory.getByte(cpu.currentInstruction))
-        memValueAddrHi = np.uint16(memory.getByte(cpu.currentInstruction + 1))
+        memValueAddrLo = memory.getByte(cpu.currentInstruction)
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + 1)
         memValueAddr = (memValueAddrHi << 8) | memValueAddrLo
-        memValueAddrOffsetY = memValueAddr + np.uint16(cpu.getRegister("Y"))
+        memValueAddrOffsetY = memValueAddr + cpu.getRegister("Y")
 
         operand = memory.getByte(memValueAddrOffsetY)
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
-        result16 = np.uint16(a) + np.uint16(operand) + np.uint16(carry_in)
-        result8 = np.uint8(result16)
+        result16 = a + operand + carry_in
+        result8 = result16 &0xFF
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
@@ -254,7 +254,7 @@ def executeLDAAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
         addr = Load2ByteAddress(cpu)
         addrPage = addr // 256
-        addrOffsetX = addr + np.uint16(cpu.getRegister(offsetRegister))
+        addrOffsetX = addr + cpu.getRegister(offsetRegister)
         addrOffsetXPage = addrOffsetX // 256
         memValue = memory.getByte(addrOffsetX)
 
@@ -271,9 +271,9 @@ def executeLDAAbsoluteIndexed(cpu, memory, offsetRegister):
 def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
     def executeX():
         cpu.incrementPC().fetchInstruction()
-        memValueAddrLo = np.uint16(memory.getByte(cpu.currentInstruction + np.uint16(cpu.getRegister("X"))))
-        memValueAddrHi = np.uint16(memory.getByte(cpu.currentInstruction + np.uint16(cpu.getRegister("X") + 1)))
-        memValueAddr = ((memValueAddrHi << 8) | memValueAddrLo)
+        memValueAddrLo = memory.getByte(cpu.currentInstruction + cpu.getRegister("X"))
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + cpu.getRegister("X") + 1)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
         memValue = memory.getByte(memValueAddr)
 
         newAValue = memValue
@@ -286,11 +286,11 @@ def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
-        memValueAddrLo = np.uint16(memory.getByte(cpu.currentInstruction))
-        memValueAddrHi = np.uint16(memory.getByte(cpu.currentInstruction + 1))
-        memValueAddr = (memValueAddrHi << 8) | memValueAddrLo
+        memValueAddrLo = memory.getByte(cpu.currentInstruction)
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + 1)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
         memValueAddrPage = memValueAddr // 256
-        memValueAddrOffsetY = memValueAddr + np.uint16(cpu.getRegister("Y"))
+        memValueAddrOffsetY = memValueAddr + cpu.getRegister("Y")
         memValueAddrOffsetYPage = memValueAddrOffsetY // 256
         memValue = memory.getByte(memValueAddrOffsetY)
 

@@ -1,8 +1,11 @@
-import numpy as np
 import time
 
 from memory import Memory
 from execution import *
+
+def clockGhz(ghz: int): return ghz * 1000000000
+def clockMhz(mhz: int): return mhz * 1000000
+def clockKhz(khz: int): return khz * 1000
 
 class CPU:
     '''
@@ -70,17 +73,17 @@ class CPU:
         - executeADCImm(self) -> return function execute.
         """
 
-        self._clockCycle = np.uint64(0)
-        self._clockCyclesThisCycle = np.uint16(0)
-        self._clockHz = np.uint64(1)
-        self._instructionCycle = np.uint64(0)
+        self._clockCycle = 0
+        self._clockCyclesThisCycle = 0
+        self._clockHz = 10
+        self._instructionCycle = 0
 
         self._registers = {
-            "A": np.uint8(0),
-            "X": np.uint8(0),
-            "Y": np.uint8(0),
-            "PC": np.uint16(0),
-            "SP": np.uint8(0)
+            "A": 0,
+            "X": 0,
+            "Y": 0,
+            "PC": 0,
+            "SP": 0
         }
         """
         A, X, Y and SP are 8-Bit.
@@ -88,19 +91,19 @@ class CPU:
         """
 
         self._flags = {
-            "carry": np.bool(False),
-            "zero": np.bool(False),
-            "interrupt disable": np.bool(False),
-            "decimal mode": np.bool(False),
-            "break command": np.bool(False),
-            "overflow": np.bool(False),
-            "negative": np.bool(False)
+            "carry": False,
+            "zero": False,
+            "interrupt disable": False,
+            "decimal mode": False,
+            "break command": False,
+            "overflow": False,
+            "negative": False
         }
         """
         carry, zero, interrupt disable, decimal mode, break command, overflow, negative
         """
 
-        self.currentInstruction = np.uint8(0x00)
+        self.currentInstruction = 0x00
 
     def __str__(self):
         return "Registers: "+ str(self._registers) + "-\n" + str(self._flags) + "-\n"
@@ -111,15 +114,25 @@ class CPU:
         '''
 
         while True:
-            cycleBeginTime = time.time()
+            cycleBeginTime = time.perf_counter()
 
             self.fetchInstruction()
             self._decodeFunctionLookupTable[self.currentInstruction]()
 
-            cycleEndTime = time.time()
-            timeToSleep = self._clockCyclesThisCycle / self._clockHz - (cycleEndTime - cycleBeginTime)
+            cycleEndTime = time.perf_counter()
+            waitUntil = cycleBeginTime + self._clockCyclesThisCycle / self._clockHz
+            while time.perf_counter() < waitUntil: pass
+
+            # debug shit
+            timeTakenInstructionCycle = cycleEndTime - cycleBeginTime
+            timeTakenInstructionCycleNS = timeTakenInstructionCycle * 1000000
+            timeToWaitInstructionCycleNS = (waitUntil - cycleBeginTime) * 1000000
+            timeClockCycleNS = timeTakenInstructionCycleNS / self._clockCyclesThisCycle
+            print("time spent per instruction cycle is {n:.10f}us.".format(n = timeTakenInstructionCycleNS))
+            print("time to wait in busy loop is {n:.10f}us.".format(n = timeToWaitInstructionCycleNS))
+            print("time per clock cycle is {n:.10f}us.\n".format(n = timeClockCycleNS))
+
             self._clockCyclesThisCycle = 0
-            time.sleep(timeToSleep)
     
     def runSingleInstructionCycle(self):
         '''
@@ -137,12 +150,12 @@ class CPU:
         '''
         loads the next instruction into currentInstruction
         '''
-        pc = self.getRegister("PC")
+        pc = self.getPC()
         self.currentInstruction = self._memory.getByte(pc)
         return self
     
     def incrementPC(self):
-        self.setRegister("PC", self.getRegister("PC") + 1)
+        self.setPC(self.getPC() + 1)
         return self
 
     def reset(self):
@@ -154,8 +167,8 @@ class CPU:
         '''
         resetVectorLoByte = self._memory.getByte(0xFFFC)
         resetVectorHiByte = self._memory.getByte(0xFFFD)
-        resetVector = np.uint16(resetVectorHiByte) << 8 | np.uint16(resetVectorLoByte)
-        self.setRegister("PC", resetVector)
+        resetVector = resetVectorHiByte << 8 | resetVectorLoByte
+        self.setPC(resetVector)
         self._clockCycle += 8
     
     def addClockCyclesThisCycle(self, n):
@@ -166,15 +179,28 @@ class CPU:
 
     def getRegister(self, reg):
         '''
-        X, Y, A, PC, SP
+        X, Y, A, SP
         '''
+        assert(reg in ("X", "Y", "A", "SP"))
         return self._registers[reg]
     
     def setRegister(self, reg, val):
         '''
-        X, Y, A, PC, SP
+        X, Y, A, SP
         '''
+        assert(type(val) == int)
+        assert(reg in ("X", "Y", "A", "SP"))
+        assert(val >= 0 and val < 256)
         self._registers[reg] = val
+    
+    def getPC(self):
+        return self._registers["PC"]
+
+    def setPC(self, val):
+        assert(type(val) == int)
+        assert(val >= 0 and val < 65536)
+        self._registers["PC"] = val
+
     
     def getFlag(self, flag):
         '''
@@ -186,15 +212,15 @@ class CPU:
         '''
         carry, zero, interrupt disable, decimal mode, break command, overflow, negative
         '''
-        assert(type(val) == bool or type(val) == np.bool)
-        self._flags[flag] = np.bool(val)
+        assert(type(val) == bool)
+        self._flags[flag] = val
     
     def resetFlags(self):
         """
         sets all flags to False
         """
         for flagKey in self._flags.keys():
-            self._flags[flagKey] = np.bool(False)
+            self._flags[flagKey] = False
 
     def resetAllRegisters(self):
         """
@@ -202,8 +228,8 @@ class CPU:
         """
         for registerKey in self._registers.keys():
             if registerKey == "PC":
-                self._registers[registerKey] = np.uint16(0)
+                self._registers[registerKey] = 0
             else:
-                self._registers[registerKey] = np.uint8(0)
+                self._registers[registerKey] = 0
         for flagKey in self._flags.keys():
-            self._flags[flagKey] = np.bool(False)
+            self._flags[flagKey] = False
