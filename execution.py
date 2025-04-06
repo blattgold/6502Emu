@@ -8,12 +8,7 @@ def Load2ByteAddress(cpu):
     return (addrHi << 8) | addrLo
 
 # NOP
-def executeNOP(cpu):
-    def execute():
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
-
-    return execute
+def executeNOP(cpu): return lambda: cpu.incrementPC().addClockCyclesThisCycle(2)
 
 # Transfer
 def transfer(origin, destination, cpu):
@@ -57,52 +52,27 @@ def executeBranch(branch, cpu):
             cpu.addClockCyclesThisCycle(4)
         else:
             cpu.addClockCyclesThisCycle(3)
-
     else:
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(2)
 
-def executeBCC(cpu):
-    return lambda: executeBranch(not cpu.getFlag("carry"), cpu)
-
-def executeBCS(cpu):
-    return lambda: executeBranch(cpu.getFlag("carry"), cpu)
-
-def executeBEQ(cpu):
-    return lambda: executeBranch(cpu.getFlag("zero"), cpu)
-
-def executeBMI(cpu):
-    return lambda: executeBranch(cpu.getFlag("negative"), cpu)
-
-def executeBNE(cpu):
-    return lambda: executeBranch(not cpu.getFlag("zero"), cpu)
-
-def executeBPL(cpu):
-    return lambda: executeBranch(not cpu.getFlag("negative"), cpu)
-
-def executeBVC(cpu):
-    return lambda: executeBranch(not cpu.getFlag("overflow"), cpu)
-
-def executeBVS(cpu):
-    return lambda: executeBranch(cpu.getFlag("overflow"), cpu)
+def executeBCC(cpu): return lambda: executeBranch(not cpu.getFlag("carry"),    cpu)
+def executeBCS(cpu): return lambda:     executeBranch(cpu.getFlag("carry"),    cpu)
+def executeBEQ(cpu): return lambda:     executeBranch(cpu.getFlag("zero"),     cpu)
+def executeBMI(cpu): return lambda:     executeBranch(cpu.getFlag("negative"), cpu)
+def executeBNE(cpu): return lambda: executeBranch(not cpu.getFlag("zero"),     cpu)
+def executeBPL(cpu): return lambda: executeBranch(not cpu.getFlag("negative"), cpu)
+def executeBVC(cpu): return lambda: executeBranch(not cpu.getFlag("overflow"), cpu)
+def executeBVS(cpu): return lambda:     executeBranch(cpu.getFlag("overflow"), cpu)
 
 # JMP
-def executeJumpDirect(cpu):
-    def execute():
-        addr = Load2ByteAddress(cpu)
-        cpu.setPC(addr)
-        cpu.addClockCyclesThisCycle(3)
-
-    return execute
-
+def executeJumpDirect(cpu): return lambda: cpu.setPC(Load2ByteAddress(cpu)).addClockCyclesThisCycle(3)
 def executeJumpIndirect(cpu, memory):
     def execute():
         addr = Load2ByteAddress(cpu)
         memValueAddrLo = memory.getByte(addr)
         memValueAddrHi = memory.getByte(addr + 1)
         memValueAddr = memValueAddrHi << 8 | memValueAddrLo
-        cpu.setPC(memValueAddr)
-        cpu.addClockCyclesThisCycle(5)
+        cpu.setPC(memValueAddr).addClockCyclesThisCycle(5)
     return execute
 
 # STA TODO tests
@@ -114,8 +84,7 @@ def executeSTAZeroPage(cpu, memory):
 
         memory.setByte(addr, a)
 
-        cpu.incrementPC()
-        cpu.addClockCyclesThisCycle(3)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
     return execute
 
 def executeSTAZeroPageX(cpu, memory):
@@ -126,8 +95,7 @@ def executeSTAZeroPageX(cpu, memory):
 
         memory.setByte(addr, a)
 
-        cpu.incrementPC()
-        cpu.addClockCyclesThisCycle(4)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeSTAAbsolute(cpu, memory):
@@ -137,8 +105,7 @@ def executeSTAAbsolute(cpu, memory):
 
         memory.setByte(addr, a)
 
-        cpu.incrementPC()
-        cpu.addClockCyclesThisCycle(4)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeSTAAbsoluteIndexed(cpu, memory, register):
@@ -148,8 +115,7 @@ def executeSTAAbsoluteIndexed(cpu, memory, register):
 
         memory.setByte(addr, a)
 
-        cpu.incrementPC()
-        cpu.addClockCyclesThisCycle(5)
+        cpu.incrementPC().addClockCyclesThisCycle(5)
     return execute
 
 def executeSTAIndirectIndexed(cpu, memory, register):
@@ -162,8 +128,7 @@ def executeSTAIndirectIndexed(cpu, memory, register):
         a = cpu.getRegister("A")
         memory.setByte(memValueAddr, a)
 
-        cpu.addClockCyclesThisCycle(6)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(6)
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
@@ -175,8 +140,7 @@ def executeSTAIndirectIndexed(cpu, memory, register):
         a = cpu.getRegister("A")
         memory.setByte(memValueAddr, a)
 
-        cpu.addClockCyclesThisCycle(6)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(6)
     return executeX if register == "X" else executeY
 
 # increment TODO tests
@@ -243,7 +207,7 @@ def executeDEY(cpu):
         cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
-# ADC
+# ADC TODO refactor
 def setADCFlags(cpu, result16, result8, a, operand):
     cpu.setFlag("carry", result16 > 0xFF)
     same_sign = (a & 0x80) == (operand & 0x80)
@@ -265,8 +229,7 @@ def executeADCImm(cpu):
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 def executeADCZeroPage(cpu, memory):
@@ -281,8 +244,7 @@ def executeADCZeroPage(cpu, memory):
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
-        cpu.addClockCyclesThisCycle(3)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(3)
     return execute
 
 def executeADCZeroPageX(cpu, memory):
@@ -297,8 +259,7 @@ def executeADCZeroPageX(cpu, memory):
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeADCAbsolute(cpu, memory):
@@ -312,8 +273,7 @@ def executeADCAbsolute(cpu, memory):
         cpu.setRegister("A", result8)
 
         setADCFlags(cpu, result16, result8, a, operand)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeADCAbsoluteIndexed(cpu, memory, offsetRegister):
@@ -333,8 +293,7 @@ def executeADCAbsoluteIndexed(cpu, memory, offsetRegister):
 
         # add one cycle if indexing resulted in page flip
         if addrOffset // 256 != addr // 256: cpu.addClockCyclesThisCycle(1)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeADCIndirectIndexed(cpu, memory, offsetRegister):
@@ -354,8 +313,7 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
 
         setADCFlags(cpu, result16, result8, a, operand)
 
-        cpu.addClockCyclesThisCycle(6)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(6)
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
@@ -376,16 +334,13 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
 
         # add one cycle if indexing resulted in page flip
         if memValueAddr // 256 != memValueAddrOffsetY // 256: cpu.addClockCyclesThisCycle(1)
-        cpu.addClockCyclesThisCycle(5)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(5)
     return executeX if offsetRegister == "X" else executeY
 
 # LDA TODO refactor
 def LDSetFlags(result, cpu):
-    if result == 0: cpu.setFlag("zero", True)
-    else: cpu.setFlag("zero", False)
-    if result & 0b10000000: cpu.setFlag("negative", True)
-    else: cpu.setFlag("negative", False)
+    cpu.setFlag("zero",     result ==  0)
+    cpu.setFlag("negative", result > 127)
 
 def executeLDAImm(cpu):
     def execute():
@@ -396,8 +351,7 @@ def executeLDAImm(cpu):
 
         LDSetFlags(newAValue, cpu)
 
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 def executeLDAZeroPage(cpu, memory):
@@ -409,8 +363,7 @@ def executeLDAZeroPage(cpu, memory):
 
         LDSetFlags(newAValue, cpu)
 
-        cpu.addClockCyclesThisCycle(3)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(3)
     return execute
 
 def executeLDAZeroPageX(cpu, memory):
@@ -423,8 +376,7 @@ def executeLDAZeroPageX(cpu, memory):
 
         LDSetFlags(newAValue, cpu)
 
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDAAbsolute(cpu, memory):
@@ -437,16 +389,13 @@ def executeLDAAbsolute(cpu, memory):
 
         LDSetFlags(newAValue, cpu)
 
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDAAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
         addr = Load2ByteAddress(cpu)
-        addrPage = addr // 256
         addrOffsetX = addr + cpu.getRegister(offsetRegister)
-        addrOffsetXPage = addrOffsetX // 256
         memValue = memory.getByte(addrOffsetX)
 
         newAValue = memValue
@@ -454,9 +403,8 @@ def executeLDAAbsoluteIndexed(cpu, memory, offsetRegister):
 
         LDSetFlags(newAValue, cpu)
 
-        if addrOffsetXPage != addrPage: cpu.addClockCyclesThisCycle(1)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        if addrOffsetX // 256 != addr // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
@@ -472,17 +420,14 @@ def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
 
         LDSetFlags(newAValue, cpu)
 
-        cpu.addClockCyclesThisCycle(6)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(6)
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
         memValueAddrLo = memory.getByte(cpu.currentInstruction)
         memValueAddrHi = memory.getByte(cpu.currentInstruction + 1)
         memValueAddr = memValueAddrHi << 8 | memValueAddrLo
-        memValueAddrPage = memValueAddr // 256
         memValueAddrOffsetY = memValueAddr + cpu.getRegister("Y")
-        memValueAddrOffsetYPage = memValueAddrOffsetY // 256
         memValue = memory.getByte(memValueAddrOffsetY)
 
         newAValue = memValue
@@ -490,134 +435,106 @@ def executeLDAIndirectIndexed(cpu, memory, offsetRegister):
 
         LDSetFlags(newAValue, cpu)
 
-        if memValueAddrPage != memValueAddrOffsetYPage: cpu.addClockCyclesThisCycle(1)
-        cpu.addClockCyclesThisCycle(5)
-        cpu.incrementPC()
+        if memValueAddr // 256 != memValueAddrOffsetY // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(5)
     return executeX if offsetRegister == "X" else executeY
 
-# LDX TODO refactor
+# LDX
 def executeLDXImm(cpu):
     def execute():
         cpu.incrementPC().fetchInstruction()
         newXValue = cpu.currentInstruction
         cpu.setRegister("X", newXValue)
         LDSetFlags(newXValue, cpu)
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 def executeLDXZeroPage(cpu, memory):
     def execute():
         cpu.incrementPC().fetchInstruction()
-        memAddr = cpu.currentInstruction
-        newXValue = memory.getByte(memAddr)
-
-        cpu.setRegister("X", newXValue)
-        LDSetFlags(newXValue, cpu)
-        cpu.addClockCyclesThisCycle(3)
-        cpu.incrementPC()
+        addr = cpu.currentInstruction
+        x = memory.getByte(addr)
+        cpu.setRegister("X", x)
+        LDSetFlags(x, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
     return execute
 
 def executeLDXZeroPageY(cpu, memory):
     def execute():
         cpu.incrementPC().fetchInstruction()
-        memAddr = cpu.currentInstruction
-        newXValue = memory.getByte(memAddr + cpu.getRegister("Y"))
-
-        cpu.setRegister("X", newXValue)
-        LDSetFlags(newXValue, cpu)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = cpu.currentInstruction
+        x = memory.getByte(addr + cpu.getRegister("Y"))
+        cpu.setRegister("X", x)
+        LDSetFlags(x, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDXAbsolute(cpu, memory):
     def execute():
-        memAddr = Load2ByteAddress(cpu)
-
-        newXValue = memory.getByte(memAddr)
-
-        cpu.setRegister("X", newXValue)
-        LDSetFlags(newXValue, cpu)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = Load2ByteAddress(cpu)
+        x = memory.getByte(addr)
+        cpu.setRegister("X", x)
+        LDSetFlags(x, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDXAbsoluteY(cpu, memory):
     def execute():
-        memAddr = Load2ByteAddress(cpu)
-        memAddrOffsetY = memAddr + cpu.getRegister("Y")
-        newXValue = memory.getByte(memAddrOffsetY)
-
-        cpu.setRegister("X", newXValue)
-        LDSetFlags(newXValue, cpu)
-
-        memAddrPage = memAddr // 256
-        memAddrOffsetYPage = memAddrOffsetY // 256
-        if memAddrPage != memAddrOffsetYPage: cpu.addClockCyclesThisCycle(1)
-
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = Load2ByteAddress(cpu)
+        addrOffset = addr + cpu.getRegister("Y")
+        x = memory.getByte(addrOffset)
+        cpu.setRegister("X", x)
+        LDSetFlags(x, cpu)
+        if addr // 256 != addrOffset // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
-# LDY TODO refactor
+# LDY
 def executeLDYImm(cpu):
     def execute():
         cpu.incrementPC().fetchInstruction()
-        newYValue = cpu.currentInstruction
-        cpu.setRegister("Y", newYValue)
-        LDSetFlags(newYValue, cpu)
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
+        y = cpu.currentInstruction
+        cpu.setRegister("Y", y)
+        LDSetFlags(y, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 def executeLDYZeroPage(cpu, memory):
     def execute():
         cpu.incrementPC().fetchInstruction()
-        memAddr = cpu.currentInstruction
-        newYValue = memory.getByte(memAddr)
-
-        cpu.setRegister("Y", newYValue)
-        LDSetFlags(newYValue, cpu)
-        cpu.addClockCyclesThisCycle(3)
-        cpu.incrementPC()
+        addr = cpu.currentInstruction
+        y = memory.getByte(addr)
+        cpu.setRegister("Y", y)
+        LDSetFlags(y, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
     return execute
 
 def executeLDYZeroPageX(cpu, memory):
     def execute():
         cpu.incrementPC().fetchInstruction()
-        memAddr = cpu.currentInstruction
-        newYValue = memory.getByte(memAddr + cpu.getRegister("X"))
-
-        cpu.setRegister("Y", newYValue)
-        LDSetFlags(newYValue, cpu)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = cpu.currentInstruction
+        y = memory.getByte(addr + cpu.getRegister("X"))
+        cpu.setRegister("Y", y)
+        LDSetFlags(y, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDYAbsolute(cpu, memory):
     def execute():
-        memAddr = Load2ByteAddress(cpu)
-
-        newYValue = memory.getByte(memAddr)
-
-        cpu.setRegister("Y", newYValue)
-        LDSetFlags(newYValue, cpu)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = Load2ByteAddress(cpu)
+        y = memory.getByte(addr)
+        cpu.setRegister("Y", y)
+        LDSetFlags(y, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
 def executeLDYAbsoluteX(cpu, memory):
     def execute():
-        memAddr = Load2ByteAddress(cpu)
-        memAddrPage = memAddr // 256
-        memAddrOffsetY = memAddr + cpu.getRegister("X")
-        memAddrOffsetYPage = memAddrOffsetY // 256
-
-        newYValue = memory.getByte(memAddrOffsetY)
-
-        cpu.setRegister("Y", newYValue)
-        LDSetFlags(newYValue, cpu)
-        if memAddrPage != memAddrOffsetYPage: cpu.addClockCyclesThisCycle(1)
-        cpu.addClockCyclesThisCycle(4)
-        cpu.incrementPC()
+        addr = Load2ByteAddress(cpu)
+        addrOffset = addr + cpu.getRegister("X")
+        y = memory.getByte(addrOffset)
+        cpu.setRegister("Y", y)
+        LDSetFlags(y, cpu)
+        if addr // 256 != addrOffset // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute

@@ -249,6 +249,7 @@ class CPU:
         assert(type(val) == int)
         assert(val >= 0 and val < 65536)
         self._registers["PC"] = val
+        return self
 
     
     def getFlag(self, flag):
