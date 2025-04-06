@@ -15,13 +15,23 @@ def executeNOP(cpu):
 
     return execute
 
-# TXS
+# Transfer
+def transfer(origin, destination, cpu):
+    reg = cpu.getRegister(origin)
+    cpu.setRegister(destination, reg)
+    cpu.incrementPC().addClockCyclesThisCycle(2)
+    setDecIncFlags(reg, cpu)
+
+def executeTAX(cpu): return lambda: transfer("A",  "X",  cpu)
+def executeTAY(cpu): return lambda: transfer("A",  "Y",  cpu)
+def executeTSX(cpu): return lambda: transfer("SP", "X",  cpu)
+def executeTXA(cpu): return lambda: transfer("X",  "A",  cpu)
+def executeTYA(cpu): return lambda: transfer("Y",  "A",  cpu)
 def executeTXS(cpu):
     def execute():
-        cpu.setRegister("SP", cpu.getRegister("X"))
-        cpu.addClockCyclesThisCycle(2)
-        cpu.incrementPC()
-
+        x = cpu.getRegister("X")
+        cpu.setRegister("SP", x)
+        cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
 # CLD
@@ -169,16 +179,59 @@ def executeSTAIndirectIndexed(cpu, memory, register):
         cpu.incrementPC()
     return executeX if register == "X" else executeY
 
-# decrement TODO tests
-def setDecrementFlags(val, cpu):
+# increment TODO tests
+def setDecIncFlags(val, cpu):
     cpu.setFlag("zero", val == 0)
     cpu.setFlag("negative", val > 127)
 
+def executeINCZeroPage(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = cpu.currentInstruction
+        result8 = (memory.getByte(addr) + 1) & 0xFF
+        memory.setByte(addr, result8)
+
+        setDecIncFlags(result8, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(5)
+    return execute
+
+def executeINCZeroPageX(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = (cpu.currentInstruction + cpu.getRegister("X")) & 0xFF
+        result8 = (memory.getByte(addr) + 1) & 0xFF
+        memory.setByte(addr, result8)
+
+        setDecIncFlags(result8, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(6)
+    return execute
+
+def executeINCAbsolute(cpu, memory):
+    def execute():
+        addr = Load2ByteAddress(cpu)
+        result8 = (memory.getByte(addr) + 1) & 0xFF
+        memory.setByte(addr, result8)
+
+        setDecIncFlags(result8, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(6)
+    return execute
+
+def executeINCAbsoluteX(cpu, memory):
+    def execute():
+        addr = (Load2ByteAddress(cpu) + cpu.getRegister("X")) & 0xFFFF
+        result8 = (memory.getByte(addr) + 1) & 0xFF
+        memory.setByte(addr, result8)
+
+        setDecIncFlags(result8, cpu)
+        cpu.incrementPC().addClockCyclesThisCycle(7)
+    return execute
+
+# decrement TODO tests
 def executeDEX(cpu):
     def execute():
         x = (cpu.getRegister("X") - 1) & 0xFF
         cpu.setRegister("X", x)
-        setDecrementFlags(x, cpu)
+        setDecIncFlags(x, cpu)
         cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 
@@ -186,7 +239,7 @@ def executeDEY(cpu):
     def execute():
         y = (cpu.getRegister("Y") - 1) & 0xFF
         cpu.setRegister("Y", y)
-        setDecrementFlags(y, cpu)
+        setDecIncFlags(y, cpu)
         cpu.incrementPC().addClockCyclesThisCycle(2)
     return execute
 

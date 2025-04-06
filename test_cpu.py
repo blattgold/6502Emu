@@ -48,6 +48,8 @@ def testCLD():
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(not cpu.getFlag("decimal mode"))
 
+#Decrement and Increment TODO tests
+
 #STA TODO tests
 
 #ADC TODO BCD Mode

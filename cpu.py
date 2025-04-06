@@ -3,9 +3,9 @@ import time
 from memory import Memory
 from execution import *
 
-def clockGhz(ghz: int): return ghz * 1000000000
-def clockMhz(mhz: int): return mhz * 1000000
-def clockKhz(khz: int): return khz * 1000
+def toGhz(ghz: int): return ghz * 1000000000
+def toMhz(mhz: int): return mhz * 1000000
+def toKhz(khz: int): return khz * 1000
 
 class CPU:
     '''
@@ -21,8 +21,13 @@ class CPU:
             # CLD
             0xD8: executeCLD(self),
 
-            # TXS
+            # Transfer
+            0xAA: executeTAX(self),
+            0xA8: executeTAY(self),
+            0xBA: executeTSX(self),
+            0x8A: executeTXA(self),
             0x9A: executeTXS(self),
+            0x98: executeTYA(self),
 
             # BRANCH
             0x90: executeBCC(self),
@@ -46,6 +51,12 @@ class CPU:
             0x99: executeSTAAbsoluteIndexed(self, memory, "Y"),
             0x81: executeSTAIndirectIndexed(self, memory, "X"),
             0x91: executeSTAIndirectIndexed(self, memory, "Y"),
+
+            # Increment
+            0xE6: executeINCZeroPage(self, memory),
+            0xF6: executeINCZeroPageX(self, memory),
+            0xEE: executeINCAbsolute(self, memory),
+            0xFE: executeINCAbsoluteX(self, memory),
 
             # Decrement
             0xCA: executeDEX(self),
@@ -98,7 +109,7 @@ class CPU:
 
         self._clockCycle = 0
         self._clockCyclesThisCycle = 0
-        self._clockHz = 1
+        self._clockHz = toKhz(10)
         self._instructionCycle = 0
 
         self._registers = {

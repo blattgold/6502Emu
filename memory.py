@@ -13,7 +13,7 @@ class Memory:
     
     def setBytes(self, addrStart, valArray):
         assert(type(addrStart) == int)
-        for val in valArray: 
+        for val in valArray:
             assert(val >= 0 and val < 256)
             assert(type(val == int))
 
