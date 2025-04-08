@@ -75,6 +75,48 @@ def executeJumpIndirect(cpu, memory):
         cpu.setPC(memValueAddr).addClockCyclesThisCycle(5)
     return execute
 
+# CPX and CPY TODO tests
+
+def setCPRegFlags(cpu, regOperand, operand):
+    result = (regOperand - operand) & 0xFF
+    cpu.setFlag("carry", regOperand >= operand)
+    cpu.setFlag("zero", result == 0)
+    cpu.setFlag("negative", (result & 0b10000000) != 0)
+
+    
+
+def executeCPRegImmediate(cpu, reg):
+    def execute():
+        cpu.incrementPC()
+        operand = cpu.currentInstruction
+        regOperand = cpu.getRegister(reg)
+
+        setCPRegFlags(cpu, regOperand, operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(2)
+    return execute
+
+def executeCPRegZeroPage(cpu, memory, reg):
+    def execute():
+        cpu.incrementPC()
+        operand = memory.getByte(cpu.currentInstruction)
+        regOperand = cpu.getRegister(reg)
+
+        setCPRegFlags(cpu, regOperand, operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(3)
+    return execute
+
+def executeCPRegAbsolute(cpu, memory, reg):
+    def execute():
+        operand = Load2ByteAddress(cpu)
+        regOperand = cpu.getRegister(reg)
+
+        setCPRegFlags(cpu, regOperand, operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
 # STA TODO tests
 def executeSTAZeroPage(cpu, memory):
     def execute():

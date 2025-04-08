@@ -43,6 +43,14 @@ class CPU:
             0x4C: executeJumpDirect(self),
             0x6C: executeJumpIndirect(self, memory),
 
+            # CPX CPY
+            0xE0: executeCPRegImmediate(self, "X"),
+            0xC0: executeCPRegImmediate(self, "Y"),
+            0xE4: executeCPRegZeroPage(self, memory, "X"),
+            0xC4: executeCPRegZeroPage(self, memory, "Y"),
+            0xEC: executeCPRegAbsolute(self, memory, "X"),
+            0xCC: executeCPRegAbsolute(self, memory, "Y"),
+
             # STA
             0x85: executeSTAZeroPage(self, memory),
             0x95: executeSTAZeroPageX(self, memory),
