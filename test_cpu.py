@@ -532,6 +532,45 @@ def testADCIndirect():
     cpu.resetFlags()
     cpu.setRegister("Y", 0)
 
+# TODO SBC Tests and BCD Mode
+def testSBCImm():
+    # overflow, zero, carry and negative
+    memory.setBytes(0x1000, [0xE9, 1, 0xE9, 0x10, 0xE9, 0x00])
+    
+    cpu.setFlag("carry", True)
+    cpu.setRegister("A", 3)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    print(cpu)
+    assert(cpu.getRegister("A") == 2)
+    assert(not cpu.getFlag("zero"))
+    assert(not cpu.getFlag("negative"))
+    assert(cpu.getFlag("carry"))
+    assert(not cpu.getFlag("overflow"))
+    cpu.resetFlags()
+
+    cpu.setFlag("carry", True)
+    cpu.setRegister("A", 0)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    print(cpu)
+    assert(cpu.getRegister("A") == 0xF0)
+    assert(not cpu.getFlag("zero"))
+    assert(cpu.getFlag("negative"))
+    assert(not cpu.getFlag("carry"))
+    assert(not cpu.getFlag("overflow"))
+    cpu.resetFlags()
+
+    cpu.setFlag("carry", False)
+    cpu.setRegister("A", 0)
+    assert(cpu.runSingleInstructionCycle() == 2)
+    print(cpu)
+    assert(cpu.getRegister("A") == 0xFF)
+    assert(not cpu.getFlag("zero"))
+    assert(cpu.getFlag("negative"))
+    assert(not cpu.getFlag("carry"))
+    assert(not cpu.getFlag("overflow"))
+    cpu.resetFlags()
+
+
 #LDA
 def testLDAImm():
     memory.setBytes(0x1000, [0xA9, 0x45, 0xA9, 0x00, 0xA9, 0x80])
@@ -761,6 +800,8 @@ tests = [
     testLDAAbsoluteY,
     testLDAIndirectX,
     testLDAIndirectY,
+
+    testSBCImm,
 
     testLDXImm,
     testLDXZeroPage,

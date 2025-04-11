@@ -379,6 +379,139 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
         cpu.incrementPC().addClockCyclesThisCycle(5)
     return executeX if offsetRegister == "X" else executeY
 
+
+# TODO SBC tests Refactor
+def executeSBCImm(cpu):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        operand = cpu.currentInstruction
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        print(operand)
+        print(nOperand)
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+        cpu.incrementPC().addClockCyclesThisCycle(2)
+    return execute
+
+def executeSBCZeroPage(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        operand = memory.getByte(cpu.currentInstruction)
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
+    return execute
+
+def executeSBCZeroPageX(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        operand = memory.getByte(cpu.currentInstruction + cpu.getRegister("X"))
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeSBCAbsolute(cpu, memory):
+    def execute():
+        operand = memory.getByte(Load2ByteAddress(cpu))
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeSBCAbsoluteIndexed(cpu, memory, offsetRegister):
+    def execute():
+        addr = Load2ByteAddress(cpu)
+        addrOffset = addr + cpu.getRegister(offsetRegister)
+
+        operand = memory.getByte(addrOffset)
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+
+        # add one cycle if indexing resulted in page flip
+        if addrOffset // 256 != addr // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeSBCIndirectIndexed(cpu, memory, offsetRegister):
+    def executeX():
+        cpu.incrementPC().fetchInstruction()
+        memValueAddrLo = memory.getByte(cpu.currentInstruction + cpu.getRegister("X"))
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + cpu.getRegister("X") + 1)
+        memValueAddr = memValueAddrHi << 8 | memValueAddrLo
+
+        operand = memory.getByte(memValueAddr)
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(6)
+    
+    def executeY():
+        cpu.incrementPC().fetchInstruction()
+        memValueAddrLo = memory.getByte(cpu.currentInstruction)
+        memValueAddrHi = memory.getByte(cpu.currentInstruction + 1)
+        memValueAddr = (memValueAddrHi << 8) | memValueAddrLo
+        memValueAddrOffsetY = memValueAddr + cpu.getRegister("Y")
+
+        operand = memory.getByte(memValueAddrOffsetY)
+        nOperand = (~operand + 1) & 0xFF
+        borrow_in = 0 if cpu.getFlag("carry") else 1
+        a = cpu.getRegister("A")
+
+        result16 = a + nOperand - borrow_in
+        result8 = result16 & 0xFF
+        cpu.setRegister("A", result8)
+
+        setADCFlags(cpu, result16, result8, a, ~operand)
+
+        # add one cycle if indexing resulted in page flip
+        if memValueAddr // 256 != memValueAddrOffsetY // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(5)
+    return executeX if offsetRegister == "X" else executeY
+
+
 # LDA TODO refactor
 def LDSetFlags(result, cpu):
     cpu.setFlag("zero",     result ==  0)

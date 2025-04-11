@@ -80,6 +80,16 @@ class CPU:
             0x61: executeADCIndirectIndexed(self, memory, "X"),
             0x71: executeADCIndirectIndexed(self, memory, "Y"),
 
+            # SBC TODO BCD TESTS
+            0xE9: executeSBCImm(self),
+            0xE5: executeSBCZeroPage(self, memory),
+            0xF5: executeSBCZeroPageX(self, memory),
+            0xED: executeSBCAbsolute(self, memory),
+            0xFD: executeSBCAbsoluteIndexed(self, memory, "X"),
+            0xF9: executeSBCAbsoluteIndexed(self, memory, "Y"),
+            0xE1: executeSBCIndirectIndexed(self, memory, "X"),
+            0xF1: executeSBCIndirectIndexed(self, memory, "Y"),
+
             # LDA
             0xA9: executeLDAImm(self),
             0xA5: executeLDAZeroPage(self, memory),
@@ -178,6 +188,23 @@ class CPU:
             print("time per clock cycle is {n:.10f}us.\n".format(n = timeClockCycleNS))
 
             self._clockCyclesThisCycle = 0
+    
+    def runPerfTest(self, program):
+        self._optimizeDecodeLut()
+        self._memory.setBytes(0x1000, program)
+        self.setPC(0x1000)
+        
+        times = []
+
+        for i in range(len(program) // 3):
+            cycleBeginTime = time.perf_counter()
+            self.fetchInstruction()
+            self._decodeFunctionLookupTable[self.currentInstruction]()
+            self._clockCyclesThisCycle = 0
+
+            timeTakenInstructionCycle = (time.perf_counter() - cycleBeginTime) * 1000000
+            times.append(timeTakenInstructionCycle)
+        return times
     
     def _optimizeDecodeLut(self):
         def unimplemented(i):
@@ -291,3 +318,16 @@ class CPU:
                 self._registers[registerKey] = 0
         for flagKey in self._flags.keys():
             self._flags[flagKey] = False
+
+
+if __name__ == "__main__":
+    memory = Memory()
+    cpu = CPU(memory)
+    cpu.reset()
+    test = []
+    for i in range(15000):
+        test.append(0xae)
+        test.append(0x10)
+        test.append(0x20)
+    result = cpu.runPerfTest(test)
+    print(sum(result) / len(result))
