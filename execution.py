@@ -1,5 +1,3 @@
-
-
 def Load2ByteAddress(cpu):
     cpu.incrementPC().fetchInstruction()
     addrLo = cpu.currentInstruction
@@ -76,14 +74,11 @@ def executeJumpIndirect(cpu, memory):
     return execute
 
 # CPX and CPY TODO tests
-
 def setCPRegFlags(cpu, regOperand, operand):
     result = (regOperand - operand) & 0xFF
     cpu.setFlag("carry", regOperand >= operand)
     cpu.setFlag("zero", result == 0)
     cpu.setFlag("negative", (result & 0b10000000) != 0)
-
-    
 
 def executeCPRegImmediate(cpu, reg):
     def execute():
@@ -184,6 +179,60 @@ def executeSTAIndirectIndexed(cpu, memory, register):
 
         cpu.incrementPC().addClockCyclesThisCycle(6)
     return executeX if register == "X" else executeY
+
+# STX
+def executeSTXZeroPage(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = cpu.currentInstruction
+        result8 = memory.getByte(addr)
+        cpu.setRegister("X", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
+    return execute
+
+def executeSTXZeroPageY(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = cpu.currentInstruction + cpu.getRegister("Y")
+        result8 = memory.getByte(addr)
+        cpu.setRegister("X", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeSTXAbsolute(cpu, memory):
+    def execute():
+        addr = Load2ByteAddress(cpu)
+        result8 = memory.getByte(addr)
+        cpu.setRegister("X", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+# STY
+def executeSTYZeroPage(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = cpu.currentInstruction
+        result8 = memory.getByte(addr)
+        cpu.setRegister("Y", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(3)
+    return execute
+
+def executeSTYZeroPageX(cpu, memory):
+    def execute():
+        cpu.incrementPC().fetchInstruction()
+        addr = cpu.currentInstruction + cpu.getRegister("X")
+        result8 = memory.getByte(addr)
+        cpu.setRegister("Y", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeSTYAbsolute(cpu, memory):
+    def execute():
+        addr = Load2ByteAddress(cpu)
+        result8 = memory.getByte(addr)
+        cpu.setRegister("Y", result8)
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
 
 # increment TODO tests
 def setDecIncFlags(val, cpu):
@@ -379,7 +428,6 @@ def executeADCIndirectIndexed(cpu, memory, offsetRegister):
         cpu.incrementPC().addClockCyclesThisCycle(5)
     return executeX if offsetRegister == "X" else executeY
 
-
 # TODO SBC tests Refactor
 def executeSBCImm(cpu):
     def execute():
@@ -388,9 +436,6 @@ def executeSBCImm(cpu):
         nOperand = (~operand + 1) & 0xFF
         borrow_in = 0 if cpu.getFlag("carry") else 1
         a = cpu.getRegister("A")
-
-        print(operand)
-        print(nOperand)
 
         result16 = a + nOperand - borrow_in
         result8 = result16 & 0xFF
@@ -510,7 +555,6 @@ def executeSBCIndirectIndexed(cpu, memory, offsetRegister):
         if memValueAddr // 256 != memValueAddrOffsetY // 256: cpu.addClockCyclesThisCycle(1)
         cpu.incrementPC().addClockCyclesThisCycle(5)
     return executeX if offsetRegister == "X" else executeY
-
 
 # LDA TODO refactor
 def LDSetFlags(result, cpu):

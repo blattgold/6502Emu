@@ -3,9 +3,9 @@ import time
 from memory import Memory
 from execution import *
 
-def toGhz(ghz: int): return ghz * 1000000000
-def toMhz(mhz: int): return mhz * 1000000
-def toKhz(khz: int): return khz * 1000
+def toGhz(hz: int): return hz * 1000000000
+def toMhz(hz: int): return hz * 1000000
+def toKhz(hz: int): return hz * 1000
 
 class CPU:
     '''
@@ -59,6 +59,16 @@ class CPU:
             0x99: executeSTAAbsoluteIndexed(self, memory, "Y"),
             0x81: executeSTAIndirectIndexed(self, memory, "X"),
             0x91: executeSTAIndirectIndexed(self, memory, "Y"),
+
+            # STX
+            0x86: executeSTXZeroPage(self, memory),
+            0x96: executeSTXZeroPageY(self, memory),
+            0x8E: executeSTXAbsolute(self, memory),
+
+            # STY
+            0x84: executeSTYZeroPage(self, memory),
+            0x94: executeSTYZeroPageX(self, memory),
+            0x8C: executeSTYAbsolute(self, memory),
 
             # Increment
             0xE6: executeINCZeroPage(self, memory),
