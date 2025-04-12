@@ -1,0 +1,19 @@
+
+- [ ] DEC
+	- [ ] Implemented
+	- [ ] Tested
+- [ ] DEX
+	- [x] Implemented
+	- [ ] Tested
+- [ ] DEY
+	- [x] Implemented
+	- [ ] Tested
+- [ ] INC
+	- [x] Implemented
+	- [ ] Tested
+- [ ] INX
+	- [ ] Implemented
+	- [ ] Tested
+- [ ] INY
+	- [ ] Implemented
+	- [ ] Tested

@@ -1,0 +1,37 @@
+
+- [x] LDA
+	- [x] Implemented
+	- [x] Tested
+- [x] LDX
+	- [x] Implemented
+	- [x] Tested
+- [x] LDY
+	- [x] Implemented
+	- [x] Tested
+- [ ] STA
+	- [x] Implemented
+	- [ ] Tested
+- [ ] STX
+	- [x] Implemented
+	- [ ] Tested
+- [ ] STY
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TAX
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TAY
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TSX
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TXA
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TXS
+	- [x] Implemented
+	- [ ] Tested
+- [ ] TYA
+	- [x] Implemented
+	- [ ] Tested
