@@ -3,7 +3,7 @@
 	- [ ] Implemented
 	- [ ] Tested
 - [ ] ORA
-	- [ ] Implemented
+	- [x] Implemented
 	- [ ] Tested
 - [ ] EOR
 	- [ ] Implemented

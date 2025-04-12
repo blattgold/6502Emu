@@ -123,6 +123,16 @@ class CPU:
             0xB4: executeLDYZeroPageX(self, memory),
             0xAC: executeLDYAbsolute(self, memory),
             0xBC: executeLDYAbsoluteX(self, memory),
+
+            #ORA
+            0x09: executeORAIMM(self),
+            0x05: executeORAZeroPage(self, memory),
+            0x15: executeORAZeroPageX(self, memory),
+            0x0D: executeORAAbsolute(self, memory),
+            0x1D: executeORAAbsoluteIndexed(self, memory, "X"),
+            0x19: executeORAAbsoluteIndexed(self, memory, "Y"),
+            0x01: executeORAIndirectIndexed(self, memory, "X"),
+            0x11: executeORAIndirectIndexed(self, memory, "Y"),
         }
         """
         Maps opcodes to execution functions.
@@ -181,6 +191,8 @@ class CPU:
 
             self.fetchInstruction()
             print("op-code: " + hex(self.currentInstruction))
+            print("next2: " + hex(self._memory.getByte(self.getPC() + 1)) + hex(self._memory.getByte(self.getPC() + 2)))
+            print(self)
 
             self._decodeFunctionLookupTable[self.currentInstruction]()
 
@@ -196,6 +208,7 @@ class CPU:
             print("time spent per instruction cycle is {n:.10f}us.".format(n = timeTakenInstructionCycleNS))
             print("time to wait in busy loop is {n:.10f}us.".format(n = timeToWaitInstructionCycleNS))
             print("time per clock cycle is {n:.10f}us.\n".format(n = timeClockCycleNS))
+            print(self)
 
             self._clockCyclesThisCycle = 0
     
