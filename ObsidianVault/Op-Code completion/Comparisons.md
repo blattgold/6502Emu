@@ -1,6 +1,14 @@
 
 - [ ] CMP
 	- [ ] Implemented
+		- [x] Immediate
+		- [x] ZeroPage
+		- [x] ZeroPageX
+		- [x] Absolute
+		- [ ] AbsoluteX
+		- [ ] AbsoluteY
+		- [ ] IndirectX
+		- [ ] IndirectY
 	- [ ] Tested
 - [x] CPX
 	- [x] Implemented

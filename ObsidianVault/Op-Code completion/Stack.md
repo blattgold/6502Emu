@@ -6,8 +6,8 @@
 	- [ ] Implemented
 	- [ ] Tested
 - [ ] PLA
-	- [ ] Implemented
+	- [x] Implemented
 	- [ ] Tested
 - [ ] PLP
-	- [ ] Implemented
+	- [x] Implemented
 	- [ ] Tested

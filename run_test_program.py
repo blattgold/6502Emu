@@ -22,6 +22,6 @@ with open(os.path.join(DIR, "testProgram", "6502_functional_test.bin"), "rb") as
     cpu.reset()
     
     print("\n")
-    cpu.setPC(0x1000)
+    cpu.setPC(0x1900)
     cpu.run()
 

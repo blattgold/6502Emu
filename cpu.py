@@ -29,6 +29,10 @@ class CPU:
             0x9A: executeTXS(self),
             0x98: executeTYA(self),
 
+            # STACK
+            0x28: executeStackPull(self, memory, "Flags"),
+            0x68: executeStackPull(self, memory, "A"),
+
             # BRANCH
             0x90: executeBCC(self),
             0xB0: executeBCS(self),
@@ -50,6 +54,12 @@ class CPU:
             0xC4: executeCPRegZeroPage(self, memory, "Y"),
             0xEC: executeCPRegAbsolute(self, memory, "X"),
             0xCC: executeCPRegAbsolute(self, memory, "Y"),
+
+            #CMP
+            0xC9: executeCPRegImmediate(self, "A"),
+            0xC5: executeCPRegZeroPage(self, memory, "A"),
+            0xD5: executeCPRegZeroPageX(self, memory, "A"),
+            0xCD: executeCPRegZeroPage(self, memory, "A"),
 
             # STA
             0x85: executeSTAZeroPage(self, memory),
@@ -270,12 +280,14 @@ class CPU:
         Performs the 6502 reset procedure:
         - loads resetVector from 0xFFFC - 0xFFFD
         - sets PC to the value (address) contained in reset vector
-        - this takes 8 clock cycles
+        - sets SP to 0xFD
+        this takes 8 clock cycles
         '''
         resetVectorLoByte = self._memory.getByte(0xFFFC)
         resetVectorHiByte = self._memory.getByte(0xFFFD)
         resetVector = resetVectorHiByte << 8 | resetVectorLoByte
         self.setPC(resetVector)
+        self.setRegister("SP", 0xFD)
         self._clockCycle += 8
     
     def addClockCyclesThisCycle(self, n):
@@ -322,6 +334,25 @@ class CPU:
         '''
         assert(type(val) == bool)
         self._flags[flag] = val
+    
+    def setFlagsFromByte(self, byte):
+        '''
+        takes in an integer which represents a byte and interprets it as the flag register
+        b7 = Negative
+        b6 = Overflow
+        b5 ignored
+        b4 ignored
+        b3 = Decimal
+        b2 = Interrupt
+        b1 = Zero
+        b0 = Carry
+        '''
+        self.setFlag("negative", True if byte & 0b10000000 else False)
+        self.setFlag("overflow", True if byte & 0b01000000 else False)
+        self.setFlag("decimal mode", True if byte & 0b00001000 else False)
+        self.setFlag("interrupt disable", True if byte & 0b00000100 else False)
+        self.setFlag("zero", True if byte & 0b00000010 else False)
+        self.setFlag("carry", True if byte & 0b00000001 else False)
     
     def resetFlags(self):
         """

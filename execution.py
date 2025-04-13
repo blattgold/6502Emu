@@ -75,6 +75,26 @@ def executeJumpIndirect(cpu, memory):
         cpu.setPC(result16).addClockCyclesThisCycle(5)
     return execute
 
+def executeStackPull(cpu, memory, reg):
+    '''
+    reg = A or Flags
+    '''
+    def execute():
+        sp = cpu.getRegister("SP")
+        addr = 0x0100 + sp
+        operand = memory.getByte(addr)
+
+        if reg == "Flags": cpu.setFlagsFromByte(operand)
+        elif reg == "A":
+            cpu.setRegister("A", operand)
+            setZNFlags(operand, cpu)
+
+        spNew = (sp + 1) & 0xFF
+        cpu.setRegister("SP", spNew)
+        
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
 # CPX and CPY TODO tests
 def setCPRegFlags(cpu, regOperand, operand):
     result = (regOperand - operand) & 0xFF
@@ -97,6 +117,19 @@ def executeCPRegZeroPage(cpu, memory, reg):
     def execute():
         cpu.incrementPC()
         operand = memory.getByte(cpu.currentInstruction)
+        regOperand = cpu.getRegister(reg)
+
+        setCPRegFlags(cpu, regOperand, operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(3)
+    return execute
+
+def executeCPRegZeroPageX(cpu, memory, reg):
+    def execute():
+        cpu.incrementPC()
+        addr = cpu.currentInstruction
+        addrOffset = (addr + cpu.getRegister(reg)) & 0xFF
+        operand = memory.getByte(addrOffset)
         regOperand = cpu.getRegister(reg)
 
         setCPRegFlags(cpu, regOperand, operand)
