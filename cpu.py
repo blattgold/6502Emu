@@ -61,7 +61,9 @@ class CPU:
             0xC9: executeCPRegImmediate(self, "A"),
             0xC5: executeCPRegZeroPage(self, memory, "A"),
             0xD5: executeCPRegZeroPageX(self, memory, "A"),
-            0xCD: executeCPRegZeroPage(self, memory, "A"),
+            0xCD: executeCPRegAbsolute(self, memory, "A"),
+            0xDD: executeCPRegAbsoluteIndexed(self, memory, "A", "X"),
+            0xD9: executeCPRegAbsoluteIndexed(self, memory, "A", "Y"),
 
             # STA
             0x85: executeSTAZeroPage(self, memory),

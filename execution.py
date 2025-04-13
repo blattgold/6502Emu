@@ -5,6 +5,19 @@ def Load2ByteAddress(cpu):
     addrHi = cpu.currentInstruction
     return (addrHi << 8) | addrLo
 
+def Load2ByteAddressIndexed(cpu, reg):
+    '''
+    loads 2 bytes, and returns a tuple. Takes index register.
+    (addr, addrIndexed)
+    '''
+    cpu.incrementPC().fetchInstruction()
+    addrLo = cpu.currentInstruction
+    addrLoOffset = (addrLo + cpu.getRegister(reg)) & 0xFF
+    cpu.incrementPC().fetchInstruction()
+    addrHi = cpu.currentInstruction
+    addrHiOffset = (addrHi + cpu.getRegister(reg)) & 0xFF
+    return (addrHi << 8) | addrLo, (addrHiOffset << 8) | addrLoOffset
+
 # NOP
 def executeNOP(cpu): return lambda: cpu.incrementPC().addClockCyclesThisCycle(2)
 
@@ -165,6 +178,17 @@ def executeCPRegAbsolute(cpu, memory, reg):
 
         setCPRegFlags(cpu, regOperand, operand)
 
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
+def executeCPRegAbsoluteIndexed(cpu, memory, reg, indexReg):
+    def execute():
+        operand, operandOffset = Load2ByteAddressIndexed(cpu, indexReg)
+        regOperand = cpu.getRegister(reg)
+
+        setCPRegFlags(cpu, regOperand, operandOffset)
+
+        if operand // 256 != operandOffset // 256: cpu.addClockCyclesThisCycle(1)
         cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 

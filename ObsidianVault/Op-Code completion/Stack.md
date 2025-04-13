@@ -1,9 +1,9 @@
 
 - [ ] PHA
-	- [ ] Implemented
+	- [x] Implemented
 	- [ ] Tested
 - [ ] PHP
-	- [ ] Implemented
+	- [x] Implemented
 	- [ ] Tested
 - [ ] PLA
 	- [x] Implemented

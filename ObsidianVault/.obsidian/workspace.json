@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Op-Code completion/Stack.md",
+                "file": "Op-Code completion/Comparisons.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Stack"
+              "title": "Comparisons"
             }
           },
           {
@@ -119,7 +119,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Op-Code completion/Stack.md",
+                "file": "Op-Code completion/Comparisons.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -129,7 +129,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Stack"
+              "title": "Backlinks for Comparisons"
             }
           },
           {
@@ -138,12 +138,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Op-Code completion/Stack.md",
+                "file": "Op-Code completion/Comparisons.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Stack"
+              "title": "Outgoing links from Comparisons"
             }
           },
           {
@@ -167,13 +167,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Op-Code completion/Stack.md",
+                "file": "Op-Code completion/Comparisons.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Stack"
+              "title": "Outline of Comparisons"
             }
           }
         ]
@@ -195,18 +195,18 @@
   },
   "active": "3566fe5d7ee8af6c",
   "lastOpenFiles": [
-    "Op-Code completion/Other.md",
-    "Op-Code completion/Logical.md",
-    "Op-Code completion/Jumps and Subroutines.md",
-    "Test Suite.md",
-    "Op-Code completion/Comparisons.md",
     "Op-Code completion/Conditional Branch.md",
     "Op-Code completion/Decrement and Increment.md",
     "Op-Code completion/Flag.md",
     "Op-Code completion/Interrupts.md",
+    "Op-Code completion/Jumps and Subroutines.md",
+    "Op-Code completion/Logical.md",
+    "Op-Code completion/Other.md",
     "Op-Code completion/Shift and Rotate.md",
     "Op-Code completion/Stack.md",
     "Op-Code completion/Transfer.md",
+    "Test Suite.md",
+    "Op-Code completion/Comparisons.md",
     "Op-Code completion/Arithmetic.md",
     "Op-Code completion",
     "Welcome.md"
