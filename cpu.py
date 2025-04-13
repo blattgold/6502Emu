@@ -143,6 +143,26 @@ class CPU:
             0x19: executeORAAbsoluteIndexed(self, memory, "Y"),
             0x01: executeORAIndirectIndexed(self, memory, "X"),
             0x11: executeORAIndirectIndexed(self, memory, "Y"),
+
+            #AND
+            0x29: executeANDIMM(self),
+            0x25: executeANDZeroPage(self, memory),
+            0x35: executeANDZeroPageX(self, memory),
+            0x2D: executeANDAbsolute(self, memory),
+            0x3D: executeANDAbsoluteIndexed(self, memory, "X"),
+            0x39: executeANDAbsoluteIndexed(self, memory, "Y"),
+            0x21: executeANDIndirectIndexed(self, memory, "X"),
+            0x31: executeANDIndirectIndexed(self, memory, "Y"),
+
+            #EOR
+            0x49: executeEORIMM(self),
+            0x45: executeEORZeroPage(self, memory),
+            0x55: executeEORZeroPageX(self, memory),
+            0x4D: executeEORAbsolute(self, memory),
+            0x5D: executeEORAbsoluteIndexed(self, memory, "X"),
+            0x59: executeEORAbsoluteIndexed(self, memory, "Y"),
+            0x41: executeEORIndirectIndexed(self, memory, "X"),
+            0x51: executeEORIndirectIndexed(self, memory, "Y"),
         }
         """
         Maps opcodes to execution functions.

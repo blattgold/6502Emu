@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Test Suite.md",
+                "file": "Op-Code completion/Logical.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Test Suite"
+              "title": "Logical"
             }
           },
           {
@@ -119,7 +119,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Test Suite.md",
+                "file": "Op-Code completion/Logical.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -129,7 +129,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Test Suite"
+              "title": "Backlinks for Logical"
             }
           },
           {
@@ -138,12 +138,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Test Suite.md",
+                "file": "Op-Code completion/Logical.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Test Suite"
+              "title": "Outgoing links from Logical"
             }
           },
           {
@@ -167,13 +167,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Test Suite.md",
+                "file": "Op-Code completion/Logical.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Test Suite"
+              "title": "Outline of Logical"
             }
           }
         ]
@@ -195,8 +195,8 @@
   },
   "active": "3566fe5d7ee8af6c",
   "lastOpenFiles": [
-    "Op-Code completion/Comparisons.md",
     "Test Suite.md",
+    "Op-Code completion/Comparisons.md",
     "Op-Code completion/Conditional Branch.md",
     "Op-Code completion/Decrement and Increment.md",
     "Op-Code completion/Flag.md",
