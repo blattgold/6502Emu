@@ -32,6 +32,8 @@ class CPU:
             # STACK
             0x28: executeStackPull(self, memory, "Flags"),
             0x68: executeStackPull(self, memory, "A"),
+            0x08: executeStackPush(self, memory, "Flags"),
+            0x48: executeStackPush(self, memory, "A"),
 
             # BRANCH
             0x90: executeBCC(self),
@@ -357,7 +359,7 @@ class CPU:
     
     def setFlagsFromByte(self, byte):
         '''
-        takes in an integer which represents a byte and interprets it as the flag register
+        takes in an integer which represents a byte and interprets it as the flag register. Used for stack pulls.
         b7 = Negative
         b6 = Overflow
         b5 ignored
@@ -373,6 +375,27 @@ class CPU:
         self.setFlag("interrupt disable", True if byte & 0b00000100 else False)
         self.setFlag("zero", True if byte & 0b00000010 else False)
         self.setFlag("carry", True if byte & 0b00000001 else False)
+    
+    def getByteFromFlags(self):
+        '''
+        returns an integer that represents a byte based on the current flags. Used for stack pushes.
+        b7 = Negative
+        b6 = Overflow
+        b5 = 1
+        b4 = 1
+        b3 = Decimal
+        b2 = Interrupt
+        b1 = Zero
+        b0 = Carry
+        '''
+        byte = 0
+        byte = byte | (0b10000000 if self.getFlag("negative") else 0)
+        byte = byte | (0b01000000 if self.getFlag("overflow") else 0)
+        byte = byte | (0b00001000 if self.getFlag("decimal mode") else 0)
+        byte = byte | (0b00000100 if self.getFlag("interrupt disable") else 0)
+        byte = byte | (0b00000010 if self.getFlag("zero") else 0)
+        byte = byte | (0b00000001 if self.getFlag("carry") else 0)
+        return byte
     
     def resetFlags(self):
         """

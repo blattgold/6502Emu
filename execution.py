@@ -95,6 +95,27 @@ def executeStackPull(cpu, memory, reg):
         cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
+def executeStackPush(cpu, memory, reg):
+    '''
+    reg = A or Flags
+    '''
+    def execute():
+        sp = cpu.getRegister("SP")
+        addr = 0x0100 + sp
+
+        if reg == "Flags": 
+            flagByte = cpu.getByteFromFlags()
+            memory.setByte(addr, flagByte)
+        elif reg == "A":
+            a = cpu.getRegister("A")
+            memory.setByte(addr, a)
+
+        spNew = (sp + 0xFF) & 0xFF
+        cpu.setRegister("SP", spNew)
+        
+        cpu.incrementPC().addClockCyclesThisCycle(4)
+    return execute
+
 # CPX and CPY TODO tests
 def setCPRegFlags(cpu, regOperand, operand):
     result = (regOperand - operand) & 0xFF
