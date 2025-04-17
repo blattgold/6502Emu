@@ -5,8 +5,8 @@
 		- [x] ZeroPage
 		- [x] ZeroPageX
 		- [x] Absolute
-		- [ ] AbsoluteX
-		- [ ] AbsoluteY
+		- [x] AbsoluteX
+		- [x] AbsoluteY
 		- [ ] IndirectX
 		- [ ] IndirectY
 	- [ ] Tested

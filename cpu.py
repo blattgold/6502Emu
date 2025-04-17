@@ -181,7 +181,7 @@ class CPU:
 
         self._clockCycle = 0
         self._clockCyclesThisCycle = 0
-        self._clockHz = toKhz(10)
+        self._clockHz = 100
         self._instructionCycle = 0
 
         self._registers = {
@@ -294,6 +294,17 @@ class CPU:
         pc = self.getPC()
         self.currentInstruction = self._memory.getByte(pc)
         return self
+    
+    def fetchNext(self):
+        self.incrementPC().fetchInstruction()
+        return self._memory.getByte(self.currentInstruction)
+    
+    def fetchNext2(self):
+        self.incrementPC().fetchInstruction()
+        b0 = self.currentInstruction
+        self.incrementPC().fetchInstruction()
+        b1 = self.currentInstruction
+        return (b1 << 8) | b0
     
     def incrementPC(self):
         self.setPC(self.getPC() + 1)

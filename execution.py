@@ -1,22 +1,12 @@
-def Load2ByteAddress(cpu):
-    cpu.incrementPC().fetchInstruction()
-    addrLo = cpu.currentInstruction
-    cpu.incrementPC().fetchInstruction()
-    addrHi = cpu.currentInstruction
-    return (addrHi << 8) | addrLo
 
-def Load2ByteAddressIndexed(cpu, reg):
+def Load2ByteAddrIndexed(cpu, reg):
     '''
     loads 2 bytes, and returns a tuple. Takes index register.
-    (addr, addrIndexed)
+    (boundaryCrossed, addrIndexed)
     '''
-    cpu.incrementPC().fetchInstruction()
-    addrLo = cpu.currentInstruction
-    addrLoOffset = (addrLo + cpu.getRegister(reg)) & 0xFF
-    cpu.incrementPC().fetchInstruction()
-    addrHi = cpu.currentInstruction
-    addrHiOffset = (addrHi + cpu.getRegister(reg)) & 0xFF
-    return (addrHi << 8) | addrLo, (addrHiOffset << 8) | addrLoOffset
+    addr = cpu.fetchNext2()
+    addrIndexed = (addr + cpu.getRegister(reg)) & 0xFFFF
+    return addr // 256 != addrIndexed // 256, addrIndexed
 
 # NOP
 def executeNOP(cpu): return lambda: cpu.incrementPC().addClockCyclesThisCycle(2)
@@ -76,10 +66,10 @@ def executeBVC(cpu): return lambda: executeBranch(not cpu.getFlag("overflow"), c
 def executeBVS(cpu): return lambda:     executeBranch(cpu.getFlag("overflow"), cpu)
 
 # JMP
-def executeJumpDirect(cpu): return lambda: cpu.setPC(Load2ByteAddress(cpu)).addClockCyclesThisCycle(3)
+def executeJumpDirect(cpu): return lambda: cpu.setPC(cpu.fetchNext2()).addClockCyclesThisCycle(3)
 def executeJumpIndirect(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         lookupAddr = cpu.currentInstruction
         lookupAddrNext = (lookupAddr + 1) & 0xFF
         addrLo = memory.getByte(lookupAddr)
@@ -173,7 +163,8 @@ def executeCPRegZeroPageX(cpu, memory, reg):
 
 def executeCPRegAbsolute(cpu, memory, reg):
     def execute():
-        operand = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
+        operand = memory.getByte(addr)
         regOperand = cpu.getRegister(reg)
 
         setCPRegFlags(cpu, regOperand, operand)
@@ -181,21 +172,52 @@ def executeCPRegAbsolute(cpu, memory, reg):
         cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
 
-def executeCPRegAbsoluteIndexed(cpu, memory, reg, indexReg):
+def executeCPRegAbsoluteIndexed(cpu, memory, opReg, indexReg):
     def execute():
-        operand, operandOffset = Load2ByteAddressIndexed(cpu, indexReg)
-        regOperand = cpu.getRegister(reg)
+        boundaryCrossed, addr = Load2ByteAddrIndexed(cpu, indexReg)
+        operand = memory.getByte(addr)
+        reg = cpu.getRegister(opReg)
 
-        setCPRegFlags(cpu, regOperand, operandOffset)
+        setCPRegFlags(cpu, reg, operand)
 
-        if operand // 256 != operandOffset // 256: cpu.addClockCyclesThisCycle(1)
+        if boundaryCrossed: cpu.addClockCyclesThisCycle(1)
         cpu.incrementPC().addClockCyclesThisCycle(4)
     return execute
+
+def executeCPRegIndirectIndexed(cpu, memory, opReg, indexReg):
+    def executeX():
+        lookupAddr = (cpu.fetchNext() + cpu.getRegister("X")) & 0xFF
+        lookupAddrNext = (lookupAddr + 1) & 0xFF
+        addrLo = memory.getByte(lookupAddr)
+        addrHi = memory.getByte(lookupAddrNext)
+        addr = (addrHi << 8) | addrLo
+        operand = memory.getByte(addr)
+        reg = cpu.getRegister(opReg)
+
+        setCPRegFlags(cpu, reg, operand)
+
+        cpu.incrementPC().addClockCyclesThisCycle(6)
+    
+    def executeY():
+        cpu.incrementPC().fetchInstruction()
+        lookupAddr = (cpu.currentInstruction) & 0xFF
+        lookupAddrNext = (lookupAddr + 1) & 0xFF
+        addrLo = memory.getByte(lookupAddr)
+        addrHi = memory.getByte(lookupAddrNext)
+        addr = (addrHi << 8) | addrLo
+        addrOffset = (addr + cpu.getRegister("Y")) & 0xFFFF
+        reg = cpu.getRegister(opReg)
+
+        setCPRegFlags(cpu, reg, operand)
+
+        if addr // 256 != addrOffset // 256: cpu.addClockCyclesThisCycle(1)
+        cpu.incrementPC().addClockCyclesThisCycle(5)
+    return executeX if indexReg == "X" else executeY
 
 # STA TODO tests
 def executeSTAZeroPage(cpu, memory):
     def execute():
-        cpu.incrementPC().cpu.fetchInstruction()
+        cpu.incrementPC().fetchInstruction()
         addr = cpu.currentInstruction
         a = cpu.getRegister("A")
 
@@ -217,7 +239,7 @@ def executeSTAZeroPageX(cpu, memory):
 
 def executeSTAAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         a = cpu.getRegister("A")
 
         memory.setByte(addr, a)
@@ -227,7 +249,7 @@ def executeSTAAbsolute(cpu, memory):
 
 def executeSTAAbsoluteIndexed(cpu, memory, register):
     def execute():
-        addr = (Load2ByteAddress(cpu) + cpu.getRegister(register)) & 0xFFFF
+        addr = (cpu.fetchNext2() + cpu.getRegister(register)) & 0xFFFF
         a = cpu.getRegister("A")
 
         memory.setByte(addr, a)
@@ -251,7 +273,7 @@ def executeSTAIndirectIndexed(cpu, memory, register):
     
     def executeY():
         cpu.incrementPC().fetchInstruction()
-        lookupAddr = (cpu.currentInstruction + cpu.getRegister("X")) & 0xFF
+        lookupAddr = cpu.currentInstruction
         lookupAddrNext = (lookupAddr + 1) & 0xFF
         addrLo = memory.getByte(lookupAddr)
         addrHi = memory.getByte(lookupAddrNext)
@@ -285,7 +307,7 @@ def executeSTXZeroPageY(cpu, memory):
 
 def executeSTXAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         result8 = memory.getByte(addr)
         cpu.setRegister("X", result8)
         cpu.incrementPC().addClockCyclesThisCycle(4)
@@ -312,7 +334,7 @@ def executeSTYZeroPageX(cpu, memory):
 
 def executeSTYAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         result8 = memory.getByte(addr)
         cpu.setRegister("Y", result8)
         cpu.incrementPC().addClockCyclesThisCycle(4)
@@ -347,7 +369,7 @@ def executeINCZeroPageX(cpu, memory):
 
 def executeINCAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         result8 = (memory.getByte(addr) + 1) & 0xFF
         memory.setByte(addr, result8)
 
@@ -357,7 +379,7 @@ def executeINCAbsolute(cpu, memory):
 
 def executeINCAbsoluteX(cpu, memory):
     def execute():
-        addr = (Load2ByteAddress(cpu) + cpu.getRegister("X")) & 0xFFFF
+        addr = (cpu.fetchNext2() + cpu.getRegister("X")) & 0xFFFF
         result8 = (memory.getByte(addr) + 1) & 0xFF
         memory.setByte(addr, result8)
 
@@ -441,7 +463,7 @@ def executeADCZeroPageX(cpu, memory):
 
 def executeADCAbsolute(cpu, memory):
     def execute():
-        operand = memory.getByte(Load2ByteAddress(cpu))
+        operand = memory.getByte(cpu.fetchNext2())
         carry_in = 1 if cpu.getFlag("carry") else 0
         a = cpu.getRegister("A")
 
@@ -455,7 +477,7 @@ def executeADCAbsolute(cpu, memory):
 
 def executeADCAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
 
         operand = memory.getByte(addrOffset)
@@ -571,7 +593,7 @@ def executeSBCZeroPageX(cpu, memory):
 
 def executeSBCAbsolute(cpu, memory):
     def execute():
-        operand = memory.getByte(Load2ByteAddress(cpu))
+        operand = memory.getByte(cpu.fetchNext2())
         nOperand = (~operand + 1) & 0xFF
         borrow_in = 0 if cpu.getFlag("carry") else 1
         a = cpu.getRegister("A")
@@ -586,7 +608,7 @@ def executeSBCAbsolute(cpu, memory):
 
 def executeSBCAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
 
         operand = memory.getByte(addrOffset)
@@ -693,7 +715,7 @@ def executeLDAZeroPageX(cpu, memory):
 
 def executeLDAAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         result8 = memory.getByte(addr)
         cpu.setRegister("A", result8)
         setZNFlags(result8, cpu)
@@ -702,7 +724,7 @@ def executeLDAAbsolute(cpu, memory):
 
 def executeLDAAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
         result8 = memory.getByte(addrOffset)
         cpu.setRegister("A", result8)
@@ -776,7 +798,7 @@ def executeLDXZeroPageY(cpu, memory):
 
 def executeLDXAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         x = memory.getByte(addr)
         cpu.setRegister("X", x)
         setZNFlags(x, cpu)
@@ -785,7 +807,7 @@ def executeLDXAbsolute(cpu, memory):
 
 def executeLDXAbsoluteY(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister("Y")) & 0xFFFF
         x = memory.getByte(addrOffset)
         cpu.setRegister("X", x)
@@ -827,7 +849,7 @@ def executeLDYZeroPageX(cpu, memory):
 
 def executeLDYAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         y = memory.getByte(addr)
         cpu.setRegister("Y", y)
         setZNFlags(y, cpu)
@@ -836,7 +858,7 @@ def executeLDYAbsolute(cpu, memory):
 
 def executeLDYAbsoluteX(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister("X")) & 0xFFFF
         y = memory.getByte(addrOffset)
         cpu.setRegister("Y", y)
@@ -884,7 +906,7 @@ def executeORAZeroPageX(cpu, memory):
 
 def executeORAAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         operand = memory.getByte(addr)
         a = cpu.getRegister("A")
         result8 = a | operand
@@ -895,7 +917,7 @@ def executeORAAbsolute(cpu, memory):
 
 def executeORAAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
         operand = memory.getByte(addrOffset)
         a = cpu.getRegister("A")
@@ -972,7 +994,7 @@ def executeEORZeroPageX(cpu, memory):
 
 def executeEORAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         operand = memory.getByte(addr)
         a = cpu.getRegister("A")
         result8 = a ^ operand
@@ -983,7 +1005,7 @@ def executeEORAbsolute(cpu, memory):
 
 def executeEORAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
         operand = memory.getByte(addrOffset)
         a = cpu.getRegister("A")
@@ -1060,7 +1082,7 @@ def executeANDZeroPageX(cpu, memory):
 
 def executeANDAbsolute(cpu, memory):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         operand = memory.getByte(addr)
         a = cpu.getRegister("A")
         result8 = a & operand
@@ -1071,7 +1093,7 @@ def executeANDAbsolute(cpu, memory):
 
 def executeANDAbsoluteIndexed(cpu, memory, offsetRegister):
     def execute():
-        addr = Load2ByteAddress(cpu)
+        addr = cpu.fetchNext2()
         addrOffset = (addr + cpu.getRegister(offsetRegister)) & 0xFFFF
         operand = memory.getByte(addrOffset)
         a = cpu.getRegister("A")
