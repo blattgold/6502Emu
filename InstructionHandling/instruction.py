@@ -13,6 +13,12 @@ class Instruction(ABC):
     def run(self):
         pass
 
+class InstructionImplied(Instruction):
+    def __init__(self, cpu: CPU):
+        pass
+    def run(self):
+        pass
+
 class InstructionImmediate(Instruction):
     def __init__(self, cpu: CPU):
         pass
