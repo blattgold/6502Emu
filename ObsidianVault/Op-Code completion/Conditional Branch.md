@@ -1,25 +1,25 @@
 
 - [ ] BCC
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BCS
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BEQ
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BMI
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BNE
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BPL
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BVC
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] BVS
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested

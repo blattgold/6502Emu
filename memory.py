@@ -3,7 +3,16 @@ class Memory:
         self.resetMemory()
     
     def getByte(self, addr):
+        assert(addr >= 0 and addr <= 65536)
         return self._memory[addr]
+    
+    def getTwoBytes(self, addr_start: int):
+        assert(addr_start >= 0 and addr_start <= 65536)
+        return (self._memory[addr_start + 1] << 8) | self._memory[addr_start]
+
+    def getTwoBytesTuple(self, addr_start: int):
+        assert(addr_start >= 0 and addr_start <= 65536)
+        return self._memory[addr_start], self._memory[addr_start + 1]
     
     def setByte(self, addr: int, val: int):
         assert(addr >= 0 and addr < 65536)

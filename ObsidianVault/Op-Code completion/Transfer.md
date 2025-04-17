@@ -1,21 +1,21 @@
 
-- [x] LDA
-	- [x] Implemented
-	- [x] Tested
-- [x] LDX
-	- [x] Implemented
-	- [x] Tested
-- [x] LDY
-	- [x] Implemented
-	- [x] Tested
+- [ ] LDA
+	- [ ] Implemented
+	- [ ] Tested
+- [ ] LDX
+	- [ ] Implemented
+	- [ ] Tested
+- [ ] LDY
+	- [ ] Implemented
+	- [ ] Tested
 - [ ] STA
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] STX
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] STY
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] TAX
 	- [x] Implemented

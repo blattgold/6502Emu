@@ -2,9 +2,9 @@
 - [ ] CLC
 	- [ ] Implemented
 	- [ ] Tested
-- [x] CLD
-	- [x] Implemented
-	- [x] Tested
+- [ ] CLD
+	- [ ] Implemented
+	- [ ] Tested
 - [ ] CLI
 	- [ ] Implemented
 	- [ ] Tested

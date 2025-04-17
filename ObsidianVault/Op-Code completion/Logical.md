@@ -1,10 +1,10 @@
 
 - [ ] AND
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] ORA
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] EOR
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested

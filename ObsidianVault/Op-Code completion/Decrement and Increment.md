@@ -3,13 +3,13 @@
 	- [ ] Implemented
 	- [ ] Tested
 - [ ] DEX
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] DEY
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] INC
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] INX
 	- [ ] Implemented

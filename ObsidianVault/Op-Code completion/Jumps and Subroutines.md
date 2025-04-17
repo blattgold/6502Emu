@@ -1,7 +1,7 @@
 
- - [x] JMP
-	 - [x] Implemented
-	 - [x] Tested
+ - [ ] JMP
+	 - [ ] Implemented
+	 - [ ] Tested
  - [ ] JSR
 	 - [ ] Implemented
 	 - [ ] Tested

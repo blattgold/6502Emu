@@ -1,7 +1,7 @@
 
 - [ ] ADC
-	- [x] No BCD
-	- [x] No BCD Tests
+	- [ ] No BCD
+	- [ ] No BCD Tests
 	- [ ] BCD
 	- [ ] BCD Tests
 - [ ] SBC

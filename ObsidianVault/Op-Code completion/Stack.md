@@ -1,13 +1,13 @@
 
 - [ ] PHA
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] PHP
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] PLA
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
 - [ ] PLP
-	- [x] Implemented
+	- [ ] Implemented
 	- [ ] Tested
