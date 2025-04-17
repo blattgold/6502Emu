@@ -7,7 +7,7 @@ cpu = CPU(memory)
 
 #NOP
 def testNOP():
-    memory.setBytes(0x1000, [0xEA, 0xEA])
+    memory.set_bytes(0x1000, [0xEA, 0xEA])
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.runSingleInstructionCycle() == 2)
 
@@ -15,17 +15,17 @@ def testNOP():
 
 #JMP
 def testJMPDirect():
-    memory.setBytes(0x1000, [0x4C, 0x11, 0x33])
-    memory.setByte(0x3311, 0xEA)
+    memory.set_bytes(0x1000, [0x4C, 0x11, 0x33])
+    memory.set_byte(0x3311, 0xEA)
     assert(cpu.runSingleInstructionCycle() == 3)
     assert(cpu.pc() == 0x3311)
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.pc() == 0x3312)
 
 def testJMPIndirect():
-    memory.setBytes(0x1000, [0x6C, 0x11, 0x33])
-    memory.setBytes(0x3311, [0x11, 0x44])
-    memory.setByte(0x4411, 0xEA)
+    memory.set_bytes(0x1000, [0x6C, 0x11, 0x33])
+    memory.set_bytes(0x3311, [0x11, 0x44])
+    memory.set_byte(0x4411, 0xEA)
     assert(cpu.runSingleInstructionCycle() == 5)
     assert(cpu.pc() == 0x4411)
     assert(cpu.runSingleInstructionCycle() == 2)
@@ -33,14 +33,14 @@ def testJMPIndirect():
 
 #TXS
 def testTXS():
-    memory.setBytes(0x1000, [0x9A])
+    memory.set_bytes(0x1000, [0x9A])
     cpu.set_register("X", 99)
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.get_register("SP") == 99)
 
 #CLD
 def testCLD():
-    memory.setBytes(0x1000, [0xD8, 0xD8])
+    memory.set_bytes(0x1000, [0xD8, 0xD8])
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(not cpu.get_flag("decimal mode"))
 
@@ -55,7 +55,7 @@ def testCLD():
 #ADC TODO BCD Mode
 def testADCImm():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [0x69, 12, 0x69, 128, 0x69, 64, 0x69, 1, 0x69, 0])
+    memory.set_bytes(0x1000, [0x69, 12, 0x69, 128, 0x69, 64, 0x69, 1, 0x69, 0])
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 2)
@@ -104,8 +104,8 @@ def testADCImm():
 
 def testADCZeroPage():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [0x65, 0x30, 0x65, 0x31, 0x65, 0x32, 0x65, 0x33, 0x65, 0x34])
-    memory.setBytes(0x30, [12, 128, 64, 1, 0])
+    memory.set_bytes(0x1000, [0x65, 0x30, 0x65, 0x31, 0x65, 0x32, 0x65, 0x33, 0x65, 0x34])
+    memory.set_bytes(0x30, [12, 128, 64, 1, 0])
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 3)
@@ -154,8 +154,8 @@ def testADCZeroPage():
 
 def testADCZeroPageX():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [0x75, 0x30, 0x75, 0x30, 0x75, 0x31, 0x75, 0x32, 0x75, 0x33, 0x75, 0x34])
-    memory.setBytes(0x30, [12, 128, 64, 1, 0])
+    memory.set_bytes(0x1000, [0x75, 0x30, 0x75, 0x30, 0x75, 0x31, 0x75, 0x32, 0x75, 0x33, 0x75, 0x34])
+    memory.set_bytes(0x30, [12, 128, 64, 1, 0])
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 4)
@@ -215,8 +215,8 @@ def testADCZeroPageX():
 
 def testADCAbsolute():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [0x6D, 0x30, 0x30, 0x6D, 0x31, 0x30, 0x6D, 0x32, 0x30, 0x6D, 0x33, 0x30, 0x6D, 0x34, 0x30])
-    memory.setBytes(0x3030, [12, 128, 64, 1, 0])
+    memory.set_bytes(0x1000, [0x6D, 0x30, 0x30, 0x6D, 0x31, 0x30, 0x6D, 0x32, 0x30, 0x6D, 0x33, 0x30, 0x6D, 0x34, 0x30])
+    memory.set_bytes(0x3030, [12, 128, 64, 1, 0])
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 4)
@@ -265,7 +265,7 @@ def testADCAbsolute():
 
 def testADCAbsoluteIndexed():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [
+    memory.set_bytes(0x1000, [
         0x7D, 0x30, 0x30, 
         0x7D, 0x30, 0x30, 
         0x79, 0x30, 0x30,
@@ -276,8 +276,8 @@ def testADCAbsoluteIndexed():
         0x7D, 0x33, 0x30, 
         0x7D, 0x34, 0x30
     ])
-    memory.setBytes(0x3030, [12, 128, 64, 1, 0])
-    memory.setByte(0x0100, 100)
+    memory.set_bytes(0x3030, [12, 128, 64, 1, 0])
+    memory.set_byte(0x0100, 100)
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 4)
@@ -370,7 +370,7 @@ def testADCAbsoluteIndexed():
 
 def testADCIndirect():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [
+    memory.set_bytes(0x1000, [
         0x61, 0x30, 
         0x61, 0x32, 
         0x61, 0x34, 
@@ -386,7 +386,7 @@ def testADCIndirect():
         0x71, 0x30,
         0x71, 0x3A,
     ])
-    memory.setBytes(0x30, [
+    memory.set_bytes(0x30, [
         0x00, 0x11,
         0x01, 0x11,
         0x02, 0x11,
@@ -395,14 +395,14 @@ def testADCIndirect():
         0xFF, 0x11,
     ])
 
-    memory.setBytes(0x1100, [
+    memory.set_bytes(0x1100, [
         12, 
         128, 
         64, 
         1, 
         0
     ])
-    memory.setByte(0x1200, 80)
+    memory.set_byte(0x1200, 80)
     
     cpu.set_register("A", 3)
     assert(cpu.runSingleInstructionCycle() == 6)
@@ -535,7 +535,7 @@ def testADCIndirect():
 # TODO SBC Tests and BCD Mode
 def testSBCImm():
     # overflow, zero, carry and negative
-    memory.setBytes(0x1000, [0xE9, 1, 0xE9, 0x10, 0xE9, 0x00])
+    memory.set_bytes(0x1000, [0xE9, 1, 0xE9, 0x10, 0xE9, 0x00])
     
     cpu.set_flag("carry", True)
     cpu.set_register("A", 3)
@@ -570,7 +570,7 @@ def testSBCImm():
 
 #LDA
 def testLDAImm():
-    memory.setBytes(0x1000, [0xA9, 0x45, 0xA9, 0x00, 0xA9, 0x80])
+    memory.set_bytes(0x1000, [0xA9, 0x45, 0xA9, 0x00, 0xA9, 0x80])
 
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.get_register("A") == 0x45)
@@ -588,9 +588,9 @@ def testLDAImm():
     assert(cpu.get_flag("negative"))
 
 def testLDAZeroPage():
-    memory.setBytes(0x1000, [0xA5, 0x57, 0xA5, 0x00, 0xA5, 0x80])
-    memory.setBytes(0x56, [12, 97, 201])
-    memory.setByte(0x80, 0x80)
+    memory.set_bytes(0x1000, [0xA5, 0x57, 0xA5, 0x00, 0xA5, 0x80])
+    memory.set_bytes(0x56, [12, 97, 201])
+    memory.set_byte(0x80, 0x80)
 
     assert(cpu.runSingleInstructionCycle() == 3)
     assert(cpu.get_register("A") == 97)
@@ -608,8 +608,8 @@ def testLDAZeroPage():
     assert(cpu.get_flag("negative"))
 
 def testLDAZeroPageX():
-    memory.setBytes(0x1000, [0xB5, 0x57, 0xB5, 0x58, 0xB5, 0x59])
-    memory.setBytes(0x56, [10, 66, 233, 12, 0, 0x80])
+    memory.set_bytes(0x1000, [0xB5, 0x57, 0xB5, 0x58, 0xB5, 0x59])
+    memory.set_bytes(0x56, [10, 66, 233, 12, 0, 0x80])
     cpu.set_register("X", 2)
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("A") == 12)
@@ -627,18 +627,18 @@ def testLDAZeroPageX():
     assert(cpu.get_flag("negative"))
 
 def testLDAAbsolute():
-    memory.setBytes(0x1000, [0xAD, 0x22, 0x33, 0xAD, 0x23, 0x33])
-    memory.setBytes(0x3321, [10, 30, 60])
+    memory.set_bytes(0x1000, [0xAD, 0x22, 0x33, 0xAD, 0x23, 0x33])
+    memory.set_bytes(0x3321, [10, 30, 60])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("A") == 30)
     cpu.runSingleInstructionCycle()
     assert(cpu.get_register("A") == 60)
 
 def testLDAAbsoluteX():
-    memory.setBytes(0x1000, [0xBD, 0x22, 0x33, 0xBD, 0x23, 0x33, 0xBD, 0xFE, 0x00, 0xBD, 0xFF, 0x00, 0xBD, 0xFF, 0x01])
-    memory.setBytes(0x3322, [10, 30, 60])
-    memory.setBytes(0xFE, [0x20, 0x80, 0xA0])
-    memory.setBytes(0x1FE, [12, 24, 36])
+    memory.set_bytes(0x1000, [0xBD, 0x22, 0x33, 0xBD, 0x23, 0x33, 0xBD, 0xFE, 0x00, 0xBD, 0xFF, 0x00, 0xBD, 0xFF, 0x01])
+    memory.set_bytes(0x3322, [10, 30, 60])
+    memory.set_bytes(0xFE, [0x20, 0x80, 0xA0])
+    memory.set_bytes(0x1FE, [12, 24, 36])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("A") == 10)
     cpu.set_register("X", 1)
@@ -656,10 +656,10 @@ def testLDAAbsoluteX():
     assert(cpu.get_register("A") == 36)
 
 def testLDAAbsoluteY():
-    memory.setBytes(0x1000, [0xB9, 0x22, 0x33, 0xB9, 0x23, 0x33, 0xB9, 0xFE, 0x00, 0xB9, 0xFF, 0x00, 0xB9, 0xFF, 0x01])
-    memory.setBytes(0x3322, [10, 30, 60])
-    memory.setBytes(0xFE, [0x20, 0x80, 0xA0])
-    memory.setBytes(0x1FE, [12, 24, 36])
+    memory.set_bytes(0x1000, [0xB9, 0x22, 0x33, 0xB9, 0x23, 0x33, 0xB9, 0xFE, 0x00, 0xB9, 0xFF, 0x00, 0xB9, 0xFF, 0x01])
+    memory.set_bytes(0x3322, [10, 30, 60])
+    memory.set_bytes(0xFE, [0x20, 0x80, 0xA0])
+    memory.set_bytes(0x1FE, [12, 24, 36])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("A") == 10)
     cpu.set_register("Y", 1)
@@ -677,10 +677,10 @@ def testLDAAbsoluteY():
     assert(cpu.get_register("A") == 36)
 
 def testLDAIndirectX():
-    memory.setBytes(0x1000, [0xA1, 0x22, 0xA1, 0x22])
-    memory.setBytes(0x22, [0x33, 0x33, 0x44])
-    memory.setByte(0x3333, 77)
-    memory.setByte(0x4433, 88)
+    memory.set_bytes(0x1000, [0xA1, 0x22, 0xA1, 0x22])
+    memory.set_bytes(0x22, [0x33, 0x33, 0x44])
+    memory.set_byte(0x3333, 77)
+    memory.set_byte(0x4433, 88)
 
     assert(cpu.runSingleInstructionCycle() == 6)
     assert(cpu.get_register("A") == 77)
@@ -689,10 +689,10 @@ def testLDAIndirectX():
     assert(cpu.get_register("A") == 88)
 
 def testLDAIndirectY():
-    memory.setBytes(0x1000, [0xB1, 0x22, 0xB1, 0x22])
-    memory.setBytes(0x22, [0xFF, 0x33, 0x55, 0x33])
-    memory.setByte(0x33FF, 77)
-    memory.setByte(0x3400, 88)
+    memory.set_bytes(0x1000, [0xB1, 0x22, 0xB1, 0x22])
+    memory.set_bytes(0x22, [0xFF, 0x33, 0x55, 0x33])
+    memory.set_byte(0x33FF, 77)
+    memory.set_byte(0x3400, 88)
 
     assert(cpu.runSingleInstructionCycle() == 5)
     assert(cpu.get_register("A") == 77)
@@ -703,19 +703,19 @@ def testLDAIndirectY():
 
 # LDX
 def testLDXImm():
-    memory.setBytes(0x1000, [0xA2, 129])
+    memory.set_bytes(0x1000, [0xA2, 129])
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.get_register("X") == 129)
 
 def testLDXZeroPage():
-    memory.setBytes(0x1000, [0xA6, 0x12])
-    memory.setBytes(0x11, [12, 55, 88])
+    memory.set_bytes(0x1000, [0xA6, 0x12])
+    memory.set_bytes(0x11, [12, 55, 88])
     assert(cpu.runSingleInstructionCycle() == 3)
     assert(cpu.get_register("X") == 55)
 
 def testLDXZeroPageY():
-    memory.setBytes(0x1000, [0xB6, 0x12, 0xB6, 0x12])
-    memory.setBytes(0x11, [12, 55, 88])
+    memory.set_bytes(0x1000, [0xB6, 0x12, 0xB6, 0x12])
+    memory.set_bytes(0x11, [12, 55, 88])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("X") == 55)
     cpu.set_register("Y", 1)
@@ -723,14 +723,14 @@ def testLDXZeroPageY():
     assert(cpu.get_register("X") == 88)
 
 def testLDXAbsolute():
-    memory.setBytes(0x1000, [0xAE, 0x33, 0x22])
-    memory.setBytes(0x2232, [0x11, 0x22, 0x33])
+    memory.set_bytes(0x1000, [0xAE, 0x33, 0x22])
+    memory.set_bytes(0x2232, [0x11, 0x22, 0x33])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("X") == 0x22)
 
 def testLDXAbsoluteY():
-    memory.setBytes(0x1000, [0xBE, 0xFF, 0x22, 0xBE, 0xFF, 0x22])
-    memory.setBytes(0x22FF, [0x20, 0x30])
+    memory.set_bytes(0x1000, [0xBE, 0xFF, 0x22, 0xBE, 0xFF, 0x22])
+    memory.set_bytes(0x22FF, [0x20, 0x30])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("X") == 0x20)
     cpu.set_register("Y", 1)
@@ -739,19 +739,19 @@ def testLDXAbsoluteY():
 
 # LDY
 def testLDYImm():
-    memory.setBytes(0x1000, [0xA0, 129])
+    memory.set_bytes(0x1000, [0xA0, 129])
     assert(cpu.runSingleInstructionCycle() == 2)
     assert(cpu.get_register("Y") == 129)
 
 def testLDYZeroPage():
-    memory.setBytes(0x1000, [0xA4, 0x12])
-    memory.setBytes(0x11, [12, 55, 88])
+    memory.set_bytes(0x1000, [0xA4, 0x12])
+    memory.set_bytes(0x11, [12, 55, 88])
     assert(cpu.runSingleInstructionCycle() == 3)
     assert(cpu.get_register("Y") == 55)
 
 def testLDYZeroPageY():
-    memory.setBytes(0x1000, [0xB4, 0x12, 0xB4, 0x12])
-    memory.setBytes(0x11, [12, 55, 88])
+    memory.set_bytes(0x1000, [0xB4, 0x12, 0xB4, 0x12])
+    memory.set_bytes(0x11, [12, 55, 88])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("Y") == 55)
     cpu.set_register("X", 1)
@@ -759,14 +759,14 @@ def testLDYZeroPageY():
     assert(cpu.get_register("Y") == 88)
 
 def testLDYAbsolute():
-    memory.setBytes(0x1000, [0xAC, 0x33, 0x22])
-    memory.setBytes(0x2232, [0x11, 0x22, 0x33])
+    memory.set_bytes(0x1000, [0xAC, 0x33, 0x22])
+    memory.set_bytes(0x2232, [0x11, 0x22, 0x33])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("Y") == 0x22)
 
 def testLDYAbsoluteY():
-    memory.setBytes(0x1000, [0xBC, 0xFF, 0x22, 0xBC, 0xFF, 0x22])
-    memory.setBytes(0x22FF, [0x20, 0x30])
+    memory.set_bytes(0x1000, [0xBC, 0xFF, 0x22, 0xBC, 0xFF, 0x22])
+    memory.set_bytes(0x22FF, [0x20, 0x30])
     assert(cpu.runSingleInstructionCycle() == 4)
     assert(cpu.get_register("Y") == 0x20)
     cpu.set_register("X", 1)
@@ -816,7 +816,7 @@ tests = [
 def testAll():
     for test in tests:
         cpu.resetAllRegisters()
-        memory.resetMemory()
+        memory.reset_memory()
         cpu.reset()
         test()
         print("test passed: " + test.__name__)

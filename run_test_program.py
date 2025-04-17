@@ -18,7 +18,7 @@ with open(os.path.join(DIR, "testProgram", "6502_functional_test.bin"), "rb") as
         for i in range(len(bin_arr)):
             file.write(hex(i) + ": " + hex(bin_arr[i]) + ", ")
             if i % 10 == 0: file.write("\n")
-    memory.setBytes(0x00, bin_arr)
+    memory.set_bytes(0x00, bin_arr)
     cpu.reset()
     
     print("\n")

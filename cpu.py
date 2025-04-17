@@ -19,12 +19,15 @@ class CPU:
             0x9A: trans.InstructionTransfer(self, "X", "S"), # TXS
             0x98: trans.InstructionTransfer(self, "Y", "A"), # TYA
             # Store
-            0x86: trans.InstructionStoreZeroPage(self, "X"), # STX
-            0x84: trans.InstructionStoreZeroPage(self, "Y"), # STY
-            0x85: trans.InstructionStoreZeroPage(self, "A"), # STA
+            0x86: trans.InstructionStoreZeroPage(self, "X"), # STX (ZP)
+            0x84: trans.InstructionStoreZeroPage(self, "Y"), # STY (ZP)
+            0x85: trans.InstructionStoreZeroPage(self, "A"), # STA (ZP)
             0x96: trans.InstructionStoreZeroPageIndexed(self, "X", "Y"), # STX,Y
             0x94: trans.InstructionStoreZeroPageIndexed(self, "Y", "X"), # STY,X
             0x95: trans.InstructionStoreZeroPageIndexed(self, "A", "X"), # STA,X
+            0x8E: trans.InstructionStoreAbsolute(self, "X"), # STX (Abs)
+            0x8C: trans.InstructionStoreAbsolute(self, "Y"), # STY (Abs)
+            0x8D: trans.InstructionStoreAbsolute(self, "A"), # STA (Abs)
         }
         """
         Maps opcodes to execution functions.
@@ -40,7 +43,7 @@ class CPU:
 
         self._clock_cycles_total = 0
         self._clock_cycles = 0
-        self._hz = 10
+        self._hz = 2
         self._current_instruction = 0x00
         self._instructions_total = 0
 
@@ -111,7 +114,10 @@ class CPU:
         return self
     
     def fetch(self, offset=0):
-        return self._memory.getByte((self.pc + offset) &0xFFFF)
+        return self._memory.get_byte((self.pc + offset) &0xFFFF)
+    
+    def fetch_two(self, offset=0):
+        return (self._memory.get_byte((self.pc + offset) &0xFFFF) << 8) | self._memory.get_byte((self.pc + offset + 1) &0xFFFF)
 
     def run(self):
         '''
@@ -138,8 +144,8 @@ class CPU:
         - sets SP to 0xFD
         this takes 8 clock cycles
         '''
-        resetVectorLoByte = self._memory.getByte(0xFFFC)
-        resetVectorHiByte = self._memory.getByte(0xFFFD)
+        resetVectorLoByte = self._memory.get_byte(0xFFFC)
+        resetVectorHiByte = self._memory.get_byte(0xFFFD)
         reset_vector = resetVectorHiByte << 8 | resetVectorLoByte
         self.pc = reset_vector
         self.set_register("S", 0xFD)
@@ -236,7 +242,7 @@ class CPU:
 
 if __name__ == "__main__":
     memory = Memory()
-    memory.setBytes(0x1000, [0xAA, 0xAA, 0x94, 12])
+    memory.set_bytes(0x1000, [0xAA, 0xAA, 0x94, 12, 0x8D, 0x00, 0x20])
     cpu = CPU(memory)
     cpu.reset()
     cpu.set_register("X", 12)

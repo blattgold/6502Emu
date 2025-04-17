@@ -33,11 +33,11 @@ class InstructionZeroPage(Instruction):
 
     @final
     def _get_memory_value(self) -> int:
-        return self._cpu.memory.getByte(self._addr)
+        return self._cpu.memory.get_byte(self._addr)
     
     @final
-    def _set_memory_value(self, val) -> None:
-        self._cpu.memory.setByte(self._addr, val)
+    def _set_memory_value(self, val: int) -> None:
+        self._cpu.memory.set_byte(self._addr, val)
 
 class InstructionZeroPageIndexed(Instruction):
     def __init__(self, cpu: CPU, r_index: str):
@@ -50,8 +50,23 @@ class InstructionZeroPageIndexed(Instruction):
     
     @final
     def _get_memory_value(self) -> int:
-        return self._cpu.memory.getByte((self._addr + self._cpu.get_register(self._r_index)) &0xFF)
+        return self._cpu.memory.get_byte((self._addr + self._cpu.get_register(self._r_index)) &0xFF)
     
     @final
-    def _set_memory_value(self, val) -> None:
-        self._cpu.memory.setByte((self._addr + self._cpu.get_register(self._r_index)) &0xFF, val)
+    def _set_memory_value(self, val: int) -> None:
+        self._cpu.memory.set_byte((self._addr + self._cpu.get_register(self._r_index)) &0xFF, val)
+    
+class InstructionAbsolute(Instruction):
+    def __init__(self, cpu: CPU):
+        super().__init__(cpu)
+        self._addr = 0
+        self._clock_cycles = 4
+        self._bytes = 3
+    
+    @final
+    def _get_memory_value(self) -> int:
+        return self._cpu.memory.get_two_bytes(self._addr)
+    
+    @final
+    def _set_memory_value(self, val: int) -> None:
+        self._cpu.memory.set_byte(self._addr, val)
