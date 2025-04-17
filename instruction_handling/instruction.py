@@ -34,16 +34,24 @@ class InstructionZeroPage(Instruction):
     @final
     def _get_memory_value(self) -> int:
         return self._cpu.memory.getByte(self._addr)
+    
+    @final
+    def _set_memory_value(self, val) -> None:
+        self._cpu.memory.setByte(self._addr, val)
 
 class InstructionZeroPageIndexed(Instruction):
-    def __init__(self, cpu: CPU, index_r: str):
-        assert(index_r == "X" or index_r == "Y")
+    def __init__(self, cpu: CPU, r_index: str):
+        assert(r_index == "X" or r_index == "Y")
         super().__init__(cpu)
         self._addr = 0
-        self._index_r = index_r
+        self._r_index = r_index
         self._clock_cycles = 4
         self._bytes = 2
     
     @final
     def _get_memory_value(self) -> int:
-        return self._cpu.memory.getByte((self._addr + cpu.getRegister(self._index_r)) &0xFF)
+        return self._cpu.memory.getByte((self._addr + self._cpu.get_register(self._r_index)) &0xFF)
+    
+    @final
+    def _set_memory_value(self, val) -> None:
+        self._cpu.memory.setByte((self._addr + self._cpu.get_register(self._r_index)) &0xFF, val)

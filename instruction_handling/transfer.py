@@ -33,4 +33,21 @@ class InstructionStoreZeroPage(InstructionZeroPage):
     def _run(self) -> str:
         self._addr = self._cpu.fetch(1)
         new = self._cpu.get_register(self._r_from)
-        self._cpu.memory.setByte(self._addr, new)
+        self._set_memory_value(new)
+
+class InstructionStoreZeroPageIndexed(InstructionZeroPageIndexed):
+    """
+    STA, STX, STY
+    addressing: ZeroPage,X or ZeroPage,Y
+    """
+    def __init__(self, cpu: CPU, r_from: str, r_index: str):
+        super().__init__(cpu, r_index)
+        self._r_from = r_from
+    
+    def __str__(self) -> str:
+        return f"ST{self._r_from} {hex(self._addr)},{self._r_from}"
+    
+    def _run(self) -> str:
+        self._addr = self._cpu.fetch(1)
+        new = self._cpu.get_register(self._r_from)
+        self._set_memory_value(new)

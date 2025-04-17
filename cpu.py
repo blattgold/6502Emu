@@ -22,6 +22,9 @@ class CPU:
             0x86: trans.InstructionStoreZeroPage(self, "X"), # STX
             0x84: trans.InstructionStoreZeroPage(self, "Y"), # STY
             0x85: trans.InstructionStoreZeroPage(self, "A"), # STA
+            0x96: trans.InstructionStoreZeroPageIndexed(self, "X", "Y"), # STX,Y
+            0x94: trans.InstructionStoreZeroPageIndexed(self, "Y", "X"), # STY,X
+            0x95: trans.InstructionStoreZeroPageIndexed(self, "A", "X"), # STA,X
         }
         """
         Maps opcodes to execution functions.
@@ -233,8 +236,8 @@ class CPU:
 
 if __name__ == "__main__":
     memory = Memory()
-    memory.setBytes(0x1000, [0xAA, 0xAA, 0x84, 12])
+    memory.setBytes(0x1000, [0xAA, 0xAA, 0x94, 12])
     cpu = CPU(memory)
     cpu.reset()
-    cpu.set_register("A", 12)
+    cpu.set_register("X", 12)
     cpu.run()
