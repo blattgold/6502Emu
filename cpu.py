@@ -22,12 +22,14 @@ class CPU:
             0x86: trans.InstructionStoreZeroPage(self, "X"), # STX (ZP)
             0x84: trans.InstructionStoreZeroPage(self, "Y"), # STY (ZP)
             0x85: trans.InstructionStoreZeroPage(self, "A"), # STA (ZP)
-            0x96: trans.InstructionStoreZeroPageIndexed(self, "X", "Y"), # STX,Y
-            0x94: trans.InstructionStoreZeroPageIndexed(self, "Y", "X"), # STY,X
-            0x95: trans.InstructionStoreZeroPageIndexed(self, "A", "X"), # STA,X
+            0x96: trans.InstructionStoreZeroPageIndexed(self, "X", "Y"), # STX,Y (ZP)
+            0x94: trans.InstructionStoreZeroPageIndexed(self, "Y", "X"), # STY,X (ZP)
+            0x95: trans.InstructionStoreZeroPageIndexed(self, "A", "X"), # STA,X (ZP)
             0x8E: trans.InstructionStoreAbsolute(self, "X"), # STX (Abs)
             0x8C: trans.InstructionStoreAbsolute(self, "Y"), # STY (Abs)
             0x8D: trans.InstructionStoreAbsolute(self, "A"), # STA (Abs)
+            0x9D: trans.InstructionStoreAbsoluteIndexed(self, "A", "X"), # STA,X (Abs)
+            0x99: trans.InstructionStoreAbsoluteIndexed(self, "A", "Y"), # STA,Y (Abs)
         }
         """
         Maps opcodes to execution functions.
@@ -117,7 +119,7 @@ class CPU:
         return self._memory.get_byte((self.pc + offset) &0xFFFF)
     
     def fetch_two(self, offset=0):
-        return (self._memory.get_byte((self.pc + offset) &0xFFFF) << 8) | self._memory.get_byte((self.pc + offset + 1) &0xFFFF)
+        return (self._memory.get_byte((self.pc + offset + 1) &0xFFFF) << 8) | self._memory.get_byte((self.pc + offset) &0xFFFF)
 
     def run(self):
         '''
@@ -242,8 +244,8 @@ class CPU:
 
 if __name__ == "__main__":
     memory = Memory()
-    memory.set_bytes(0x1000, [0xAA, 0xAA, 0x94, 12, 0x8D, 0x00, 0x20])
+    memory.set_bytes(0x1000, [0xAA, 0xAA, 0x94, 12, 0x8D, 0x00, 0x20, 0x9D, 0x11, 0x22])
     cpu = CPU(memory)
     cpu.reset()
-    cpu.set_register("X", 12)
+    cpu.set_register("A", 12)
     cpu.run()

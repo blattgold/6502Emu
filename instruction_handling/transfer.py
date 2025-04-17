@@ -31,9 +31,8 @@ class InstructionStoreZeroPage(InstructionZeroPage):
         return f"ST{self._r_from} {hex(self._addr)}"
 
     def _run(self) -> str:
-        self._addr = self._cpu.fetch(1)
         new = self._cpu.get_register(self._r_from)
-        self._set_memory_value(new)
+        self._set_val_at_addr(new)
 
 class InstructionStoreZeroPageIndexed(InstructionZeroPageIndexed):
     """
@@ -45,12 +44,11 @@ class InstructionStoreZeroPageIndexed(InstructionZeroPageIndexed):
         self._r_from = r_from
     
     def __str__(self) -> str:
-        return f"ST{self._r_from} {hex(self._addr)},{self._r_from}"
+        return f"ST{self._r_from} {hex(self._addr)},{self._r_index}:{self._cpu.get_register(self._r_index)}"
     
     def _run(self) -> str:
-        self._addr = self._cpu.fetch(1)
         new = self._cpu.get_register(self._r_from)
-        self._set_memory_value(new)
+        self._set_val_at_addr(new)
 
 class InstructionStoreAbsolute(InstructionAbsolute):
     """
@@ -65,6 +63,21 @@ class InstructionStoreAbsolute(InstructionAbsolute):
         return f"ST{self._r_from} {hex(self._addr)}"
 
     def _run(self) -> str:
-        self._addr = self._cpu.fetch_two(1)
         new = self._cpu.get_register(self._r_from)
-        self._set_memory_value(new)
+        self._set_val_at_addr(new)
+
+class InstructionStoreAbsoluteIndexed(InstructionAbsoluteIndexed):
+    """
+    STA, STX, STY
+    addressing: Absolute,X or Absolute,Y
+    """
+    def __init__(self, cpu: CPU, r_from: str, r_index: str):
+        super().__init__(cpu, r_index)
+        self._r_from = r_from
+    
+    def __str__(self) -> str:
+        return f"ST{self._r_from} {hex(self._addr)},{self._r_index}:{self._cpu.get_register(self._r_index)}"
+    
+    def _run(self) -> str:
+        new = self._cpu.get_register(self._r_from)
+        self._set_val_at_addr(new)

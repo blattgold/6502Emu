@@ -1,22 +1,84 @@
 
 - [ ] LDA
 	- [ ] Implemented
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
+		- [ ] Absolute,X
+		- [ ] Absolute,Y
+		- [ ] (indirect, X)
+		- [ ] (indirect),Y
 	- [ ] Tested
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
+		- [ ] Absolute,X
+		- [ ] Absolute,Y
+		- [ ] (indirect, X)
+		- [ ] (indirect),Y
 - [ ] LDX
 	- [ ] Implemented
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,Y
+		- [ ] Absolute
+		- [ ] Absolute,Y
 	- [ ] Tested
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,Y
+		- [ ] Absolute
+		- [ ] Absolute,Y
 - [ ] LDY
 	- [ ] Implemented
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
+		- [ ] Absolute,X
 	- [ ] Tested
+		- [ ] Immediate
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
+		- [ ] Absolute,X
 - [ ] STA
 	- [ ] Implemented
+		- [x] Zeropage
+		- [x] Zeropage,X
+		- [x] Absolute
+		- [ ] Absolute,X
+		- [ ] Absolute,Y
+		- [ ] (indirect, X)
+		- [ ] (indirect),Y
 	- [ ] Tested
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
+		- [ ] Absolute,X
+		- [ ] Absolute,Y
+		- [ ] (indirect, X)
+		- [ ] (indirect),Y
 - [ ] STX
-	- [ ] Implemented
+	- [x] Implemented
+		- [x] Zeropage
+		- [x] Zeropage,Y
+		- [x] Absolute
 	- [ ] Tested
+		- [ ] Zeropage
+		- [ ] Zeropage,Y
+		- [ ] Absolute
 - [ ] STY
-	- [ ] Implemented
+	- [x] Implemented
+		- [x] Zeropage
+		- [x] Zeropage,X
+		- [x] Absolute
 	- [ ] Tested
+		- [ ] Zeropage
+		- [ ] Zeropage,X
+		- [ ] Absolute
 - [ ] TAX
 	- [x] Implemented
 	- [ ] Tested
