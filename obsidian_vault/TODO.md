@@ -1,3 +1,4 @@
 
 - [ ] operation handling rewrite
-- [ ] rest of STORE instructions
+- [x] rest of STORE instructions
+- [ ] CPUState class???

@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import final
-from cpu import CPU
 
 class Instruction(ABC):
-    def __init__(self, cpu: CPU):
+    def __init__(self, cpu: "CPU"):
+        from cpu import CPU
         self._cpu = cpu
         self.clock_cycles_default = 2
         self._bytes = 1
@@ -55,7 +55,7 @@ class Instruction(ABC):
             print(self)
 
 class InstructionZeroPage(Instruction):
-    def __init__(self, cpu: CPU):
+    def __init__(self, cpu: "CPU"):
         super().__init__(cpu)
         self.clock_cycles_default = 3
         self._bytes = 2
@@ -69,7 +69,7 @@ class InstructionZeroPage(Instruction):
         self._cpu.memory.set_byte(self._addr, val)
 
 class InstructionZeroPageIndexed(Instruction):
-    def __init__(self, cpu: CPU, r_index: str):
+    def __init__(self, cpu: "CPU", r_index: str):
         assert(r_index == "X" or r_index == "Y")
         super().__init__(cpu)
         self._r_index = r_index
@@ -85,7 +85,7 @@ class InstructionZeroPageIndexed(Instruction):
         self._cpu.memory.set_byte((self._addr + self._cpu.get_register(self._r_index)) &0xFF, val)
     
 class InstructionAbsolute(Instruction):
-    def __init__(self, cpu: CPU):
+    def __init__(self, cpu: "CPU"):
         super().__init__(cpu)
         self.clock_cycles_default = 4
         self._bytes = 3
@@ -99,7 +99,7 @@ class InstructionAbsolute(Instruction):
         self._cpu.memory.set_byte(self._addr, val)
 
 class InstructionAbsoluteIndexed(Instruction):
-    def __init__(self, cpu: CPU, r_index: str):
+    def __init__(self, cpu: "CPU", r_index: str):
         assert(r_index == "X" or r_index == "Y")
         super().__init__(cpu)
         self._r_index = r_index
@@ -115,7 +115,7 @@ class InstructionAbsoluteIndexed(Instruction):
         self._cpu.memory.set_byte((self._addr + self._cpu.get_register(self._r_index)) &0xFFFF, val)
 
 class InstructionIndirectIndexed(Instruction):
-    def __init__(self, cpu: CPU, r_index: str):
+    def __init__(self, cpu: "CPU", r_index: str):
         assert(r_index == "X" or r_index == "Y")
         super().__init__(cpu)
         self._r_index = r_index

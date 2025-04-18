@@ -3,11 +3,43 @@ import time
 from memory import Memory
 from instruction_handling import transfer as trans
 
+class CPUState:
+    ID_STR = {
+        "pc",
+        "hz",
+        "clock_cycles",
+        "clock_cycles_total",
+        "current_instruction",
+        "instructions_total",
+        "X",
+        "Y",
+        "A",
+        "S",
+        "C",
+        "Z",
+        "I",
+        "D",
+        "B",
+        "V",
+        "N",
+    }
+    def __init__(self, state=None):
+        self._state = state if self._state else {}
+    
+    def state_change(self, operand, value):
+        if operand not in self.ID_STR: raise ValueError()
+        self._state[operand] = value
+    
+    @property
+    def state(self):
+        return self._state  
+
 class CPU:
     '''
     CPU class :3
     '''
-    def __init__(self, memory):
+    def __init__(self, memory, test=False):
+        self._test = test
         self._memory = memory
 
         self._decodeFunctionLookupTable = {
@@ -38,7 +70,7 @@ class CPU:
         Parameters are components needed to execute the function.
         Parameters specify a register for some instructions to reduce redundant code.
         - ADCImm requires the cpu registers, which is why it gets a reference to self (the cpu).
-        - ADCZeroPage additionally gets a reference to the memory because it operates on it.
+        - ADCZPage additionally gets a reference to the memory because it operates on it.
         - LDAAbsoluteIndexed additionally takes a String of the Register to index with (X or Y).
         The functions are curried to allow for passing parameters:
         - executeADCImm(self) -> return function execute.
@@ -64,22 +96,22 @@ class CPU:
         self ._pc = 0 # PC is 16-Bit
 
         self._flags = {
-            "carry": False,
-            "zero": False,
-            "interrupt disable": False,
-            "decimal mode": False,
-            "break command": False,
-            "overflow": False,
-            "negative": False
+            "C": False,
+            "Z": False,
+            "I": False,
+            "D": False,
+            "B": False,
+            "V": False,
+            "N": False
         }
         """
-        carry, 
-        zero, 
-        interrupt disable, 
-        decimal mode, 
-        break command, 
-        overflow, 
-        negative
+        [C]arry, 
+        [Z]ero, 
+        [I]nterrupt disable, 
+        [D]ecimal mode, 
+        [B]reak command, 
+        o[V]erflow, 
+        [N]egative
         """
 
     def __str__(self):
@@ -122,29 +154,34 @@ class CPU:
     def fetch_two(self, offset=0):
         return (self._memory.get_byte((self.pc + offset + 1) &0xFFFF) << 8) | self._memory.get_byte((self.pc + offset) &0xFFFF)
 
-    def run(self):
+    def run(self) -> "CPU":
         '''
         run reset() before running to load the reset vector into PC
+        if self._test == True then it will only run one instruction per call
         '''
         while True:
-            self._clock_cycles = 0
             cycle_start_time = time.perf_counter()
 
+            self._clock_cycles = 0
             self._current_instruction = self.fetch()
             self._decodeFunctionLookupTable[self._current_instruction]()
+            self._clock_cycles_total += self._clock_cycles
+            self._instructions_total += 1
+
+            if self._test: break
 
             cycle_end_time = time.perf_counter()
             wait_until = cycle_start_time + self._clock_cycles / self._hz
-            self._clock_cycles_total += self._clock_cycles
-            self._instructions_total += 1
             while time.perf_counter() < wait_until: pass
+        
+        return self
     
     def reset(self):
         '''
         Performs the 6502 reset procedure:
         - loads resetVector from 0xFFFC - 0xFFFD
         - sets PC to the value (address) contained in reset vector
-        - sets SP to 0xFD
+        - sets S to 0xFD
         this takes 8 clock cycles
         '''
         resetVectorLoByte = self._memory.get_byte(0xFFFC)
@@ -153,6 +190,24 @@ class CPU:
         self.pc = reset_vector
         self.set_register("S", 0xFD)
         self._clock_cycles_total += 8
+    
+    def get_state(self):
+        """
+        returns a state dict, representing the CPUs internal state
+        used for unit testing
+        """
+        state_dict =  {
+            "hz": self._hz,
+            "pc": self._pc,
+            "clock_cycles": self._clock_cycles,
+            "clock_cycles_total" : self._clock_cycles_total,
+            "instructions_total": self._instructions_total,
+        }
+
+        state_dict = self._registers | state_dict
+        state_dict = self._flags | state_dict
+
+        return state_dict
     
     def get_register(self, reg):
         '''
@@ -172,13 +227,13 @@ class CPU:
 
     def get_flag(self, flag):
         '''
-        carry, zero, interrupt disable, decimal mode, break command, overflow, negative
+        C, Z, I, D, B, V, N
         '''
         return self._flags[flag]
     
     def set_flag(self, flag, val):
         '''
-        carry, zero, interrupt disable, decimal mode, break command, overflow, negative
+        C, Z, I, D, B, V, N
         '''
         assert(type(val) == bool)
         self._flags[flag] = val
@@ -186,41 +241,41 @@ class CPU:
     def set_flags_from_byte(self, byte):
         '''
         takes in an integer which represents a byte and interprets it as the flag register. Used for stack pulls.
-        b7 = Negative
-        b6 = Overflow
+        b7 = N
+        b6 = V
         b5 ignored
         b4 ignored
-        b3 = Decimal
-        b2 = Interrupt
-        b1 = Zero
-        b0 = Carry
+        b3 = D
+        b2 = I
+        b1 = Z
+        b0 = C
         '''
-        self.set_flag("negative", True if byte & 0b10000000 else False)
-        self.set_flag("overflow", True if byte & 0b01000000 else False)
-        self.set_flag("decimal mode", True if byte & 0b00001000 else False)
-        self.set_flag("interrupt disable", True if byte & 0b00000100 else False)
-        self.set_flag("zero", True if byte & 0b00000010 else False)
-        self.set_flag("carry", True if byte & 0b00000001 else False)
+        self.set_flag("N", True if byte & 0b10000000 else False)
+        self.set_flag("V", True if byte & 0b01000000 else False)
+        self.set_flag("D", True if byte & 0b00001000 else False)
+        self.set_flag("I", True if byte & 0b00000100 else False)
+        self.set_flag("Z", True if byte & 0b00000010 else False)
+        self.set_flag("C", True if byte & 0b00000001 else False)
     
     def make_byte_from_flags(self):
         '''
         returns an integer that represents a byte based on the current flags. Used for stack pushes.
-        b7 = Negative
-        b6 = Overflow
+        b7 = N
+        b6 = V
         b5 = 1
         b4 = 1
-        b3 = Decimal
-        b2 = Interrupt
-        b1 = Zero
-        b0 = Carry
+        b3 = D
+        b2 = I
+        b1 = Z
+        b0 = C
         '''
         byte = 0
-        byte = byte | (0b10000000 if self.get_flag("negative") else 0)
-        byte = byte | (0b01000000 if self.get_flag("overflow") else 0)
-        byte = byte | (0b00001000 if self.get_flag("decimal mode") else 0)
-        byte = byte | (0b00000100 if self.get_flag("interrupt disable") else 0)
-        byte = byte | (0b00000010 if self.get_flag("zero") else 0)
-        byte = byte | (0b00000001 if self.get_flag("carry") else 0)
+        byte = byte | (0b10000000 if self.get_flag("N") else 0)
+        byte = byte | (0b01000000 if self.get_flag("V") else 0)
+        byte = byte | (0b00001000 if self.get_flag("D") else 0)
+        byte = byte | (0b00000100 if self.get_flag("I") else 0)
+        byte = byte | (0b00000010 if self.get_flag("Z") else 0)
+        byte = byte | (0b00000001 if self.get_flag("C") else 0)
         return byte
     
     def reset_flags(self):

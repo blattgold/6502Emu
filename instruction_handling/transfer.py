@@ -1,7 +1,7 @@
 from instruction_handling.instruction import *
 
 class InstructionTransfer(Instruction):
-    def __init__(self, cpu: CPU, r_from: str, r_to: str):
+    def __init__(self, cpu: "CPU", r_from: str, r_to: str):
         super().__init__(cpu)
         self._r_from = r_from
         self._r_to = r_to
@@ -23,7 +23,7 @@ class InstructionStoreZeroPage(InstructionZeroPage):
     STA, STX, STY
     adressing: ZeroPage
     """
-    def __init__(self, cpu: CPU, r_from: str):
+    def __init__(self, cpu: "CPU", r_from: str):
         super().__init__(cpu)
         self._r_from = r_from
 
@@ -39,7 +39,7 @@ class InstructionStoreZeroPageIndexed(InstructionZeroPageIndexed):
     STA, STX, STY
     addressing: ZeroPage,X or ZeroPage,Y
     """
-    def __init__(self, cpu: CPU, r_from: str, r_index: str):
+    def __init__(self, cpu: "CPU", r_from: str, r_index: str):
         super().__init__(cpu, r_index)
         self._r_from = r_from
     
@@ -55,7 +55,7 @@ class InstructionStoreAbsolute(InstructionAbsolute):
     STA, STX, STY
     adressing: Absolute
     """
-    def __init__(self, cpu: CPU, r_from: str):
+    def __init__(self, cpu: "CPU", r_from: str):
         super().__init__(cpu)
         self._r_from = r_from
 
@@ -71,7 +71,7 @@ class InstructionStoreAbsoluteIndexed(InstructionAbsoluteIndexed):
     STA, STX, STY
     addressing: Absolute,X or Absolute,Y
     """
-    def __init__(self, cpu: CPU, r_from: str, r_index: str):
+    def __init__(self, cpu: "CPU", r_from: str, r_index: str):
         super().__init__(cpu, r_index)
         self._r_from = r_from
     
@@ -87,7 +87,7 @@ class InstructionStoreIndirectIndexed(InstructionIndirectIndexed):
     STA, STX, STY
     addressing: Indirect,X or Indirect,Y
     """
-    def __init__(self, cpu: CPU, r_from: str, r_index: str):
+    def __init__(self, cpu: "CPU", r_from: str, r_index: str):
         super().__init__(cpu, r_index)
         self._r_from = r_from
     
