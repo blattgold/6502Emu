@@ -74,7 +74,9 @@ class CPUState:
         self._state.update(other_state.state)
     
     def get_state_copy(self):
-        return self._state.copy()
+        state_copy = CPUState()
+        state_copy.merge(self)
+        return state_copy
 
     @property
     def state(self):

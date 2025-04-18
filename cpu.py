@@ -66,7 +66,7 @@ class CPU:
     def fetch_two(self, offset=0):
         return (self._memory.get_byte((self.state.get_by_id("pc") + offset + 1) &0xFFFF) << 8) | self._memory.get_byte((self.state.get_by_id("pc") + offset) &0xFFFF)
 
-    def run(self) -> "CPU":
+    def run(self) -> CPUState:
         '''
         run reset() before running to load the reset vector into PC
         if self._test == True then it will only run one instruction per call
@@ -86,7 +86,7 @@ class CPU:
             wait_until = cycle_start_time + self.state.get_by_id("clock_cycles") / self.state.get_by_id("hz")
             while time.perf_counter() < wait_until: pass
         
-        return self
+        return self._state.get_state_copy()
     
     def reset(self):
         '''

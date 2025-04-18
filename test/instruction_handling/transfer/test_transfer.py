@@ -10,7 +10,5 @@ class TestTransferInstructions(unittest.TestCase):
 
     def test_correct_cycles(self):
         self.memory.set_byte(0x1000, 0xAA)
-        self.assertEqual(
-            self.cpu.run().get_state()["clock_cycles"],
-            2
-        )
+        state = self.cpu.run()
+        self.assertEqual(state.get_by_id("clock_cycles"), 2)
