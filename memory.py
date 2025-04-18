@@ -3,15 +3,15 @@ class Memory:
         self.reset_memory()
     
     def get_byte(self, addr):
-        assert(addr >= 0 and addr <= 65536)
+        assert(addr >= 0 and addr < 65536)
         return self._memory[addr]
     
     def get_two_bytes(self, addr_start: int):
-        assert(addr_start >= 0 and addr_start <= 65536)
+        assert(addr_start >= 0 and addr_start < 65536)
         return (self._memory[addr_start + 1] << 8) | self._memory[addr_start]
 
     def get_two_bytes_tuple(self, addr_start: int):
-        assert(addr_start >= 0 and addr_start <= 65536)
+        assert(addr_start >= 0 and addr_start < 65536)
         return self._memory[addr_start], self._memory[addr_start + 1]
     
     def set_byte(self, addr: int, val: int):

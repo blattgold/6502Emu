@@ -1,4 +1,27 @@
 class CPUState:
+    """
+    pc: program counter
+    hz: clock rate of the cpu
+    clock_cycles: clock cycles taken processing current instruction
+    clock_cycles_total: total clock cycles taken
+    current_instruction: current instruction
+    instructions_total: total amount of instructions ran
+    ---
+    Registers:
+    [A]ccumulator
+    [X]-index
+    [Y]-index
+    [S]tack pointer
+    ---
+    Flags:
+    [C]arry
+    [Z]ero
+    [I]nterrupt disable
+    [D]ecimal mode
+    [B]reak command
+    o[V]erflow
+    [N]egative
+    """
     _ALLOWED_KEYS = None
 
     def __init__(self, empty=True):
@@ -27,18 +50,31 @@ class CPUState:
     
     def allowed_keys(self) -> set:
         if not self._ALLOWED_KEYS:
-            self._ALLOWED_KEYS = set(_make_default_state.keys())
+            self._ALLOWED_KEYS = set(self._make_default_state().keys())
+
         return self._ALLOWED_KEYS
 
-    def set_by_id(key: str, value):
+    def set_by_id(self, key: str, value):
         if key not in self.allowed_keys():
             raise ValueError()
+        
         self._state[key] = value
     
-    def get_by_id(key:str):
+    def get_by_id(self, key:str):
         if key not in self.allowed_keys():
             raise ValueError()
+        
         return self._state[key]
+    
+    def merge(self, other_state):
+        for key in other_state.state.keys():
+            if key not in self.allowed_keys():
+                raise ValueError()
+        
+        self._state.update(other_state.state)
+    
+    def get_state_copy(self):
+        return self._state.copy()
 
     @property
     def state(self):
