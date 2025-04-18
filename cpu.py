@@ -30,6 +30,8 @@ class CPU:
             0x8D: trans.InstructionStoreAbsolute(self, "A"), # STA (Abs)
             0x9D: trans.InstructionStoreAbsoluteIndexed(self, "A", "X"), # STA,X (Abs)
             0x99: trans.InstructionStoreAbsoluteIndexed(self, "A", "Y"), # STA,Y (Abs)
+            0x81: trans.InstructionStoreIndirectIndexed(self, "A", "X"), # STA,X (Ind)
+            0x91: trans.InstructionStoreIndirectIndexed(self, "A", "Y"), # STA,Y (Ind)
         }
         """
         Maps opcodes to execution functions.
@@ -45,7 +47,7 @@ class CPU:
 
         self._clock_cycles_total = 0
         self._clock_cycles = 0
-        self._hz = 2
+        self._hz = 20
         self._current_instruction = 0x00
         self._instructions_total = 0
 
@@ -97,7 +99,6 @@ class CPU:
     
     @clock_cycles.setter
     def clock_cycles(self, val):
-        if val < 0 or val > 7: raise ValueError("clock cycles must be between 0-7")
         self._clock_cycles = val
 
     @property
@@ -244,7 +245,7 @@ class CPU:
 
 if __name__ == "__main__":
     memory = Memory()
-    memory.set_bytes(0x1000, [0xAA, 0xAA, 0x94, 12, 0x8D, 0x00, 0x20, 0x9D, 0x11, 0x22])
+    memory.set_bytes(0x1000, [0xAA, 0xAA, 0x94, 12, 0x8D, 0x00, 0x20, 0x9D, 0x11, 0x22, 0x81, 0x23, 0x91, 0x25])
     cpu = CPU(memory)
     cpu.reset()
     cpu.set_register("A", 12)

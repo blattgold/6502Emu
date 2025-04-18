@@ -45,14 +45,14 @@
 		- [ ] Absolute
 		- [ ] Absolute,X
 - [ ] STA
-	- [ ] Implemented
+	- [x] Implemented
 		- [x] Zeropage
 		- [x] Zeropage,X
 		- [x] Absolute
-		- [ ] Absolute,X
-		- [ ] Absolute,Y
-		- [ ] (indirect, X)
-		- [ ] (indirect),Y
+		- [x] Absolute,X
+		- [x] Absolute,Y
+		- [x] (indirect, X)
+		- [x] (indirect),Y
 	- [ ] Tested
 		- [ ] Zeropage
 		- [ ] Zeropage,X
