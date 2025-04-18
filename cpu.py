@@ -3,36 +3,6 @@ import time
 from memory import Memory
 from instruction_handling import transfer as trans
 
-class CPUState:
-    ID_STR = {
-        "pc",
-        "hz",
-        "clock_cycles",
-        "clock_cycles_total",
-        "current_instruction",
-        "instructions_total",
-        "X",
-        "Y",
-        "A",
-        "S",
-        "C",
-        "Z",
-        "I",
-        "D",
-        "B",
-        "V",
-        "N",
-    }
-    def __init__(self, state=None):
-        self._state = state if self._state else {}
-    
-    def state_change(self, operand, value):
-        if operand not in self.ID_STR: raise ValueError()
-        self._state[operand] = value
-    
-    @property
-    def state(self):
-        return self._state  
 
 class CPU:
     '''
