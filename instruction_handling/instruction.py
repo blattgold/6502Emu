@@ -9,12 +9,12 @@ class Instruction(ABC):
     """
     def __init__(self, cpu_state: CPUState, memory: Memory):
         self._cpu_state = cpu_state
+        self._memory = memory
         self.clock_cycles_default = 2
         self._bytes = 1
         self._addr = 0
-        self._memory = memory
 
-        self._debug = True
+        self._debug = False
 
     @property
     def clock_cycles_default(self):
