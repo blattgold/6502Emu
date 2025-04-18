@@ -22,13 +22,12 @@ class TestTransferInstructions(unittest.TestCase):
     def test_all_cycles(self):
         def run_test(opcode: int, r_from: str, r_to: str):
             self.cpu.state.set_by_id("pc", 0x1000)
-            self.memory.set_byte(0x1000, 0xAA)
+            self.memory.set_byte(0x1000, opcode)
             state = self.cpu.run()
             self.assertEqual(state.get_by_id("clock_cycles"), 2)
         
         for test in self._generate_tests():
             run_test(*test)
-    
     
     def test_all_transfer(self):
         def run_test(opcode: int, r_from: str, r_to: str, num: int):

@@ -79,21 +79,21 @@
 		- [ ] Zeropage
 		- [ ] Zeropage,X
 		- [ ] Absolute
-- [ ] TAX
+- [x] TAX
 	- [x] Implemented
-	- [ ] Tested
-- [ ] TAY
+	- [x] Tested
+- [x] TAY
 	- [x] Implemented
-	- [ ] Tested
-- [ ] TSX
+	- [x] Tested
+- [x] TSX
 	- [x] Implemented
-	- [ ] Tested
-- [ ] TXA
+	- [x] Tested
+- [x] TXA
 	- [x] Implemented
-	- [ ] Tested
-- [ ] TXS
+	- [x] Tested
+- [x] TXS
 	- [x] Implemented
-	- [ ] Tested
-- [ ] TYA
+	- [x] Tested
+- [x] TYA
 	- [x] Implemented
-	- [ ] Tested
+	- [x] Tested

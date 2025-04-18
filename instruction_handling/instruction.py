@@ -54,9 +54,9 @@ class Instruction(ABC):
         if self._bytes == 1:
             pass
         elif self._bytes == 2:
-            self._addr = self._memory.get_byte((self._cpu_state.get_by_id("pc") + 1) &0xFF)
+            self._addr = self._memory.get_byte((self._cpu_state.get_by_id("pc") + 1) &0xFFFF)
         else:
-            self._addr = self._memory.get_two_bytes((self._cpu_state.get_by_id("pc") + 1) &0xFF)
+            self._addr = self._memory.get_two_bytes((self._cpu_state.get_by_id("pc") + 1) &0xFFFF)
 
         # this is where the magic happens
         self._run()
