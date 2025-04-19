@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class AddressingModeBase(ABC):
+class AddrModeBase(ABC):
     def __init__(self):
         pass
 
@@ -8,10 +8,10 @@ class AddressingModeBase(ABC):
     def get_effective_address(self, addr):
         pass
 
-class AddressingModeZeroPage(AddressingModeBase):
+class AddrModeZP(AddressingModeBase):
     def get_effective_address(self, addr):
         return addr
 
-class AddressingModeZeroPageIndexed(AddressingModeBase):
+class AddrModeZPI(AddressingModeBase):
     def get_effective_address(self, addr, index):
         return (addr + index) &0xFF

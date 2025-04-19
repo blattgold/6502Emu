@@ -60,6 +60,9 @@ class CPU:
     def state(self):
         return self._state
     
+    def reset_state(self):
+        self._state.reset_state()
+    
     def fetch(self, offset=0):
         return self._memory.get_byte((self.state.get_by_id("pc") + offset) &0xFFFF)
     

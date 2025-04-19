@@ -77,6 +77,9 @@ class CPUState:
         state_copy = CPUState()
         state_copy.merge(self)
         return state_copy
+    
+    def reset_state(self):
+        self._state.update(self._make_default_state())
 
     @property
     def state(self):

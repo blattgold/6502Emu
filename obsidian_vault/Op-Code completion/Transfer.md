@@ -54,7 +54,7 @@
 		- [x] (indirect, X)
 		- [x] (indirect),Y
 	- [ ] Tested
-		- [ ] Zeropage
+		- [x] Zeropage
 		- [ ] Zeropage,X
 		- [ ] Absolute
 		- [ ] Absolute,X
@@ -67,7 +67,7 @@
 		- [x] Zeropage,Y
 		- [x] Absolute
 	- [ ] Tested
-		- [ ] Zeropage
+		- [x] Zeropage
 		- [ ] Zeropage,Y
 		- [ ] Absolute
 - [ ] STY
@@ -76,7 +76,7 @@
 		- [x] Zeropage,X
 		- [x] Absolute
 	- [ ] Tested
-		- [ ] Zeropage
+		- [x] Zeropage
 		- [ ] Zeropage,X
 		- [ ] Absolute
 - [x] TAX
