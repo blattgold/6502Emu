@@ -13,14 +13,29 @@ class StoreCommon(ABC, unittest.TestCase):
         self.cpu_state_init = self.cpu.state
         self.cpu.reset()
     
-    def _run_test_cycles(self, opcode: int, r_from: str, expected_cycles: int, **kwargs):
+    def _run_test_cycles(
+        self, 
+        opcode: int, 
+        r_from: str, 
+        expected_cycles: int, 
+        **kwargs
+    ):
         self.cpu.reset_state()
         self.cpu.state.set_by_id("pc", 0x1000)
         self.memory.set_bytes(0x1000, [opcode, 0x10])
         state = self.cpu.run()
         self.assertEqual(state.get_by_id("clock_cycles"), expected_cycles)
     
-    def _run_test_transfer(self, opcode: int, r_from: str, val: int, addr: int, expected_addr: int, expected_val: int, **kwargs):
+    def _run_test_transfer(
+        self, 
+        opcode: int, 
+        r_from: str, 
+        val: int, 
+        addr: int, 
+        expected_addr: int, 
+        expected_val: int, 
+        **kwargs
+    ):
         self.cpu.reset_state()
         self.cpu.state.set_by_id("pc", 0x1000)
         self.memory.set_bytes(0x1000, [opcode, addr])
@@ -47,7 +62,7 @@ class TestStoreInstructionsZP(StoreCommon):
             val = random.randint(0, 255)
             self._run_test_transfer(**test, val=val, addr=addr, expected_addr=addr, expected_val=val)
 
-class TestStoreInstructionsZPI(TestStoreInstructionsZP):
+class TestStoreInstructionsZPI(StoreCommon):
     def _gen_test_params(self):
         return [
             {"opcode": 0x96, "r_from": "X", "r_index": "Y"},
@@ -58,11 +73,26 @@ class TestStoreInstructionsZPI(TestStoreInstructionsZP):
     def test_all_cycles(self):
         for test in self._gen_test_params():
             self._run_test_cycles(**test, expected_cycles=4)
-'''
+    
+    def test_all_transfer(self):
+        for test in self._gen_test_params():
+            addr = random.randint(0, 255)
+            val = random.randint(0, 255)
+            self._run_test_transfer(**test, val=val, addr=addr, expected_addr=addr, expected_val=val)
+
     def test_all_transfer_indexed(self):
-        def run_test(opcode: int, r_from: str, r_index: str, val: int, addr: int, index: int):
+        def run_test(
+            opcode: int, 
+            r_from: str, 
+            r_index: str, 
+            val: int, 
+            addr: int, 
+            index: int, 
+            expected_addr: int, 
+            expected_val: int,
+            **kwargs
+        ):
             self.cpu.reset_state()
-            expected_effective_addr = (addr + index) &0xFF
 
             self.cpu.state.set_by_id("pc", 0x1000)
             self.memory.set_bytes(0x1000, [opcode, addr])
@@ -71,10 +101,13 @@ class TestStoreInstructionsZPI(TestStoreInstructionsZP):
             self.cpu.state.set_by_id(r_index, index)
 
             state = self.cpu.run()
-            self.assertEqual(self.cpu.memory.get_byte(expected_effective_addr), val)
+            self.assertEqual(self.cpu.memory.get_byte(expected_addr), expected_val)
         
         for test in self._gen_test_params():
-            run_test(*test, val=random.randint(0, 255), addr=random.randint(0, 255), index=random.randint(0, 255))
+            addr = random.randint(0, 255)
+            val = random.randint(0, 255)
+            index = random.randint(0, 255)
+            run_test(**test, val=val, addr=addr, index=index, expected_addr=(addr + index) &0xFF, expected_val= val)
     
     def test_all_edge_cases(self):
         def run_test(opcode: int, r_from: str, r_index: str, val: int, addr: int, index: int):
@@ -91,10 +124,10 @@ class TestStoreInstructionsZPI(TestStoreInstructionsZP):
             self.assertEqual(self.cpu.memory.get_byte(expected_effective_addr), val)
         
         for test in self._gen_test_params():
-            run_test(*test, val=0xFF, addr=0x00, index=0x00)
-            run_test(*test, val=0xFF, addr=0xFF, index=0x00)
-            run_test(*test, val=0xFF, addr=0x00, index=0xFF)
-            run_test(*test, val=0xFF, addr=0xFF, index=0xFF)'''
+            run_test(**test, val=0xFF, addr=0x00, index=0x00)
+            run_test(**test, val=0xFF, addr=0xFF, index=0x00)
+            run_test(**test, val=0xFF, addr=0x00, index=0xFF)
+            run_test(**test, val=0xFF, addr=0xFF, index=0xFF)
 # ABS TODO
 # ABI TODO
 # IND TODO
