@@ -55,30 +55,30 @@
 		- [x] (indirect),Y
 	- [ ] Tested
 		- [x] Zeropage
-		- [ ] Zeropage,X
-		- [ ] Absolute
+		- [x] Zeropage,X
+		- [x] Absolute
 		- [ ] Absolute,X
 		- [ ] Absolute,Y
 		- [ ] (indirect, X)
 		- [ ] (indirect),Y
-- [ ] STX
+- [x] STX
 	- [x] Implemented
 		- [x] Zeropage
 		- [x] Zeropage,Y
 		- [x] Absolute
-	- [ ] Tested
+	- [x] Tested
 		- [x] Zeropage
-		- [ ] Zeropage,Y
-		- [ ] Absolute
-- [ ] STY
+		- [x] Zeropage,Y
+		- [x] Absolute
+- [x] STY
 	- [x] Implemented
 		- [x] Zeropage
 		- [x] Zeropage,X
 		- [x] Absolute
-	- [ ] Tested
+	- [x] Tested
 		- [x] Zeropage
-		- [ ] Zeropage,X
-		- [ ] Absolute
+		- [x] Zeropage,X
+		- [x] Absolute
 - [x] TAX
 	- [x] Implemented
 	- [x] Tested
